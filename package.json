@@ -1,0 +1,29 @@
+{
+  "name": "koop-pgcache",
+  "version": "0.0.1",
+  "description": "A postgis cache for koop",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Esri/koop-pgcache.git"
+  },
+  "author": "Chris Helm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Esri/koop-pgcache/issues"
+  },
+  "homepage": "https://github.com/Esri/koop-pgcache",
+  "dependencies": {
+    "pg": "^4.2.0",
+    "sphericalmercator": "^1.0.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "should": "^4.6.1"
+  }
+}

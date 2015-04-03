@@ -235,4 +235,37 @@ describe('pgCache Model Tests', function(){
         });
 
       });
+
+    describe('when filtering with coded domains', function(){
+
+      var fields = [{
+        name: "NAME",
+        type: "esriFieldTypeSmallInteger",
+        alias: "NAME",
+        domain: {
+          type: "codedValue",
+          name: "NAME",
+          codedValues: [
+            {
+              name: "Name0",
+              code: 0
+            },
+            {
+              name: "Name1",
+              code: 1
+            }
+          ]
+        }
+      }];
+
+      var value = 0,
+        fieldName = 'NAME';
+
+      it('should replace value', function(done){
+        value = pgCache.applyCodedDomains(fieldName, value, fields);
+        value.should.equal('Name0');
+        done();
+      });
+
+    });
 });

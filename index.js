@@ -50,7 +50,7 @@ module.exports = {
     if ( options.geometry ){
       var geom = this.parseGeometry( options.geometry );
 
-      if (geom.xmin && geom.ymin ){
+      if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
         var box = geom;
         if (box.spatialReference.wkid != 4326){
           var mins = merc.inverse( [box.xmin, box.ymin] ),
@@ -102,7 +102,22 @@ module.exports = {
     });
   },
 
-  createRangeFilterFromSql: function (sql) {
+  // check for any coded values in the fields
+  // if we find a match, replace value with the coded val
+  applyCodedDomains: function(fieldName, value, fields){
+    fields.forEach(function (field){
+      if (field.domain && (field.domain.name && field.domain.name == fieldName)){
+        field.domain.codedValues.forEach(function(coded){
+          if (parseInt(coded.code) == parseInt(value)){
+            value = coded.name;
+          }
+        });
+      }
+    });
+    return value;
+  },
+
+  createRangeFilterFromSql: function (sql, fields) {
 
     var paramIndex = 0;
     var terms, type;
@@ -120,21 +135,27 @@ module.exports = {
     }
     if (terms.length !== 2) { return; }
 
-    var fieldName = terms[0];
+    var fieldName = terms[0].replace(/\'([^\']*)'/g, "$1");
     var value = terms[1];
 
+    // check for fields and apply any coded domains 
+    if (fields){
+      value = this.applyCodedDomains(fieldName, value, fields);
+    }
     //if (dataType === 'date') {
     //  value = moment(value.replace(/(\')|(date \')/g, ''), this.dateFormat).toDate().getTime();
     //}
-    var field = ' (feature->\'properties\'->>\''+ terms[0].replace(/\'([^\']*)'/g, "$1")+'\')';
+    var field = ' (feature->\'properties\'->>\''+ fieldName + '\')';
     if ( parseInt(value) || parseInt(value) === 0){
       if ( ( ( parseFloat(value) == parseInt( value ) ) && !isNaN( value )) || value === 0){
         field += '::float::int';
       } else {
         field += '::float';
       }
+      return field + ' '+type+' ' + value;
+    } else {
+      return field + ' '+type+' \'' + value.replace(/'/g, '') + '\'';
     }
-    return field + ' '+type+' ' + value;
 
   },
 
@@ -145,24 +166,30 @@ module.exports = {
 
     // replace N for unicode values so we can rehydrate filter pages
     var value = terms[1].replace(/^N'/g,'\''); //.replace(/^\'%|%\'$/g, '');
-
     // to support downloads we set quotes on unicode fieldname, here we remove them 
-    field = ' (feature->\'properties\'->>\''+ terms[0].replace(/\'([^\']*)'/g, "$1") + '\')';
+    var fieldName = terms[0].replace(/\'([^\']*)'/g, "$1");
+    
+    // check for fields and apply any coded domains 
+    if (fields){
+      value = this.applyCodedDomains(fieldName, value, fields);
+    }
+
+    field = ' (feature->\'properties\'->>\''+ fieldName + '\')';
     return field + ' ilike ' + value;
   },
 
-  createFilterFromSql: function (sql) {
+  createFilterFromSql: function (sql, fields) {
     if (sql.indexOf(' like ') > -1) {
       //like
-      return this.createLikeFilterFromSql( sql );
+      return this.createLikeFilterFromSql( sql, fields );
 
     } else if (sql.indexOf(' >= ') > -1 || sql.indexOf(' <= ') > -1 || sql.indexOf(' = ') > -1)  {
       //part of a range
-      return this.createRangeFilterFromSql(sql);
+      return this.createRangeFilterFromSql(sql, fields);
     }
   },
 
-  createWhereFromSql: function (sql) {
+  createWhereFromSql: function (sql, fields) {
     var self = this;
     var terms = sql.split(' AND ');
     var pairs, filter, andWhere = [], orWhere = [];
@@ -175,11 +202,11 @@ module.exports = {
       pairs = term.split(' OR ');
       if ( pairs.length > 1 ){
         pairs.forEach( function (item) {
-          orWhere.push( self.createFilterFromSql( item ) );
+          orWhere.push( self.createFilterFromSql( item, fields ) );
         });
       } else {
         pairs.forEach( function (item) {
-          andWhere.push( self.createFilterFromSql( item ) );
+          andWhere.push( self.createFilterFromSql( item, fields ) );
         });
       }
     });
@@ -221,7 +248,7 @@ module.exports = {
           // parse the where clause 
           if ( options.where ) { 
             if ( options.where != '1=1'){
-              var clause = self.createWhereFromSql(options.where);
+              var clause = self.createWhereFromSql(options.where, options.fields);
               select += ' WHERE ' + clause;
             } else {
               select += ' WHERE ' + options.where;
@@ -232,7 +259,7 @@ module.exports = {
           if ( options.geometry ){
             var geom = self.parseGeometry( options.geometry );
 
-            if (geom.xmin && geom.ymin ){
+            if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
               var box = geom;
               if (box.spatialReference.wkid != 4326){
                 var mins = merc.inverse( [box.xmin, box.ymin] ),

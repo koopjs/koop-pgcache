@@ -10,4 +10,5 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[0.0.3]: https://github.com/Esri/koop-pgcache/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/Esri/koop-pgcache/compare/v0.0.1...v0.0.2

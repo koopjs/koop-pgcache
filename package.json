@@ -1,6 +1,6 @@
 {
   "name": "koop-pgcache",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A postgis cache for koop",
   "main": "index.js",
   "scripts": {

@@ -267,6 +267,11 @@ module.exports = {
             } else {
               select += ' WHERE ' + options.where;
             }
+            if (options.idFilter){
+              select += ' AND ' + options.idFilter;
+            }
+          } else if (options.idFilter) {
+            select += ' WHERE ' + options.idFilter;
           }
 
           // parse the geometry param from GeoServices REST

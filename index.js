@@ -132,6 +132,14 @@ module.exports = {
       terms = sql.split(' = ');
       paramIndex = 1;
       type = '=';
+    } else if (sql.indexOf(' > ') > -1){
+      terms = sql.split(' > ');
+      paramIndex = 1;
+      type = '>';
+    } else if ( sql.indexOf(' < ') > -1){
+      terms = sql.split(' < ');
+      paramIndex = 1;
+      type = '<';
     }
     if (terms.length !== 2) { return; }
 
@@ -183,7 +191,13 @@ module.exports = {
       //like
       return this.createLikeFilterFromSql( sql, fields );
 
-    } else if (sql.indexOf(' >= ') > -1 || sql.indexOf(' <= ') > -1 || sql.indexOf(' = ') > -1)  {
+    } else if (
+      sql.indexOf(' < ') > -1 || 
+      sql.indexOf(' > ') > -1 || 
+      sql.indexOf(' >= ') > -1 || 
+      sql.indexOf(' <= ') > -1 || 
+      sql.indexOf(' = ') > -1 )  
+    {
       //part of a range
       return this.createRangeFilterFromSql(sql, fields);
     }

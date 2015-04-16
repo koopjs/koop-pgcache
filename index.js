@@ -289,7 +289,7 @@ module.exports = {
                 box.ymax = maxs[1];
               }
 
-              select += (options.where ) ? ' AND ' : ' WHERE ';
+              select += (options.where || options.idFilter) ? ' AND ' : ' WHERE ';
               var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
               select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
               //select += 'ST_Intersects(ST_GeomFromGeoJSON(feature->>\'geometry\'), ST_MakeEnvelope('+box.xmin+','+box.ymin+','+box.xmax+','+box.ymax+'))';

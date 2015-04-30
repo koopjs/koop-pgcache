@@ -580,7 +580,9 @@ module.exports = {
   },
 
   geoHashAgg: function (table, limit, precision, options, callback) {
-    var self = this;
+    var self = this, 
+      rowLimit = options.rowLimit || 10000, 
+      pageLimit = options.pageLimit || 5000;
 
     var whereFilter, geomFilter;
     if ( options.where ){
@@ -614,31 +616,78 @@ module.exports = {
     var build = function (p) {
       var agg = {};
       var sql = 'SELECT count(id) as count, ST_GeoHash(st_geomfromgeojson((feature->>\'geometry\'::text)),'+p+') as geohash from "'+table+'"';
+      var countSql = 'select count(id) as count from "'+table+'"';
+
       if (whereFilter) {
         sql += whereFilter;
+        countSql += whereFilter;
       }
       if (geomFilter){
         sql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
+        countSql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
       }
-      sql += ' GROUP BY geohash;';
-      self._query(sql, function(err, res){
-        if (!err && res && res.rows.length) {
-          if (res.rows.length <= limit) {
-            res.rows.forEach(function (row) {
-              agg[row.geohash] = row.count;
-            });
-            callback(err, agg);
-          } else {
-            build(p-1);
+
+      // get the count of features
+      self._query( countSql, function(err, res){
+        if (!err && res.rows.length && (res.rows[0].count > rowLimit)) {
+          // count is too high, must page over the data 
+          var npages = Math.ceil(res.rows[0].count/ pageLimit);
+          var tasks = [];
+          for (var i=0; i < npages; i++){
+            var offset = (i * (pageLimit)) + 1;
+            var filter = ' id >= '+ offset + ' AND id < ' + (offset + pageLimit);
+            tasks.push(sql + ((options.whereFilter || options.geomFilter) ? ' AND '+filter : ' WHERE '+filter) + ' GROUP BY geohash');
           }
-        } else {
-          callback(err, res);
-        }
+          callback(null, {
+            pages: tasks,
+            status: 'exceeds-limit' 
+          });
+        } else {        
+          
+          sql += ' GROUP BY geohash';
+          self._query(sql, function(err, res){
+            if (!err && res && res.rows.length) {
+              if (res.rows.length <= limit) {
+                res.rows.forEach(function (row) {
+                  agg[row.geohash] = row.count;
+                });
+                callback(err, agg);
+              } else {
+                build(p-1);
+              }
+            } else {
+              callback(err, res);
+            }
+          });
+        } 
       });
     }; 
     // get the geohash with the given precision
     build(precision);
   },
+
+  buildGeoHashPages: function(sql, idFilters, options, callback){
+    var self = this;
+    var pageSql = []
+    idFilters.forEach(function (filter) {
+      pageSql.push(sql + ((options.whereFilter || options.geomFilter) ? ' AND '+filter : ' WHERE '+filter) + ' GROUP BY geohash'); 
+    });
+    callback('Not ready yet', null);
+  },
+
+  getGeoHashPage: function(sql, callback){
+    var agg = {};
+    this._query(sql, function(err, res){
+      if (!err && res && res.rows.length) {
+        res.rows.forEach(function (row) {
+          agg[row.geohash] = row.count;
+        });
+        callback(err, agg);
+      } else {
+        callback(err, res);
+      }
+    });
+  }, 
 
   //--------------
   // PRIVATE METHODS

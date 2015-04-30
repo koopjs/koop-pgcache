@@ -192,8 +192,8 @@ module.exports = {
       return this.createLikeFilterFromSql( sql, fields );
 
     } else if (
-      sql.indexOf(' < ') > -1 || 
-      sql.indexOf(' > ') > -1 || 
+      sql.indexOf(' < ') > -1  || 
+      sql.indexOf(' > ') > -1  || 
       sql.indexOf(' >= ') > -1 || 
       sql.indexOf(' <= ') > -1 || 
       sql.indexOf(' = ') > -1 )  
@@ -579,6 +579,66 @@ module.exports = {
     });
   },
 
+  geoHashAgg: function (table, limit, precision, options, callback) {
+    var self = this;
+
+    var whereFilter, geomFilter;
+    if ( options.where ){
+      if ( options.where != '1=1'){
+        var clause = this.createWhereFromSql(options.where);
+        whereFilter = ' WHERE ' + clause;
+      } else {
+        whereFilter = ' WHERE ' + options.where;
+      } 
+    }
+
+    if ( options.geometry ){
+      var geom = this.parseGeometry( options.geometry );
+
+      if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
+        var box = geom;
+        if (box.spatialReference.wkid != 4326){
+          var mins = merc.inverse( [box.xmin, box.ymin] ),
+            maxs = merc.inverse( [box.xmax, box.ymax] );
+          box.xmin = mins[0];
+          box.ymin = mins[1];
+          box.xmax = maxs[0];
+          box.ymax = maxs[1];
+        }
+
+        var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
+        geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
+      }
+    }
+
+    var build = function (p) {
+      var agg = {};
+      var sql = 'SELECT count(id) as count, ST_GeoHash(st_geomfromgeojson((feature->>\'geometry\'::text)),'+p+') as geohash from "'+table+'"';
+      if (whereFilter) {
+        sql += whereFilter;
+      }
+      if (geomFilter){
+        sql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
+      }
+      sql += ' GROUP BY geohash;';
+      self._query(sql, function(err, res){
+        if (!err && res && res.rows.length) {
+          if (res.rows.length <= limit) {
+            res.rows.forEach(function (row) {
+              agg[row.geohash] = row.count;
+            });
+            callback(err, agg);
+          } else {
+            build(p-1);
+          }
+        } else {
+          callback(err, res);
+        }
+      });
+    }; 
+    // get the geohash with the given precision
+    build(precision);
+  },
 
   //--------------
   // PRIVATE METHODS

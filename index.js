@@ -616,7 +616,7 @@ module.exports = {
             }
 
             if ( index ){
-              self._query( 'CREATE INDEX '+name.replace(/:/g,'')+'_gix ON "'+name+'" USING GIST ( geom )', function(err){
+              self._query( 'CREATE INDEX '+name.replace(/:|-/g,'')+'_gix ON "'+name+'" USING GIST ( ST_GeomfromGeoJSON(feature->>\'geometry\') )', function(err){
                 if (callback) {
                   callback();
                 }

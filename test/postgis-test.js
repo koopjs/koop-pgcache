@@ -268,4 +268,60 @@ describe('pgCache Model Tests', function(){
       });
 
     });
+
+    describe('when creating geohash aggregations', function(){
+      var gKey = 'test:german:data4',
+        data = require('./fixtures/germany.json'),
+        limit = 1000,
+        precision = 8,
+        options = { name: 'german-data', geomType: 'Point', features: data.features };
+
+      it('should create a geohash', function(done){
+        pgCache.remove(gKey+':0', function(err, result){
+          pgCache.insert( gKey, options, 0, function( e, s ){
+            pgCache.geoHashAgg(gKey+':0', limit, precision, {}, function(err, res){
+              should.not.exist(error);
+              Object.keys(res).length.should.equal( 169 );
+              done();
+            });
+          });
+        });
+      });
+
+      it('should return a reduced geohash when passing a low limit', function(done){
+        pgCache.remove(gKey+':0', function(err, result){
+          pgCache.insert( gKey, options, 0, function( e, s ){
+            pgCache.geoHashAgg(gKey+':0', 100, precision, {}, function(err, res){
+              should.not.exist(error);
+              Object.keys(res).length.should.equal( 29 );
+              done();
+            });
+          });
+        });
+      });
+
+      it('should return a geohash when passing where clause', function(done){
+        pgCache.remove(gKey+':0', function(err, result){
+          pgCache.insert( gKey, options, 0, function( e, s ){
+            pgCache.geoHashAgg(gKey+':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land  = \'Poland\')  AND Art = \'BRL\''}, function(err, res){
+              should.not.exist(error);
+              Object.keys(res).length.should.equal( 5 );
+              done();
+            });
+          });
+        });
+      });
+
+      it('should return a geohash when passing geometry filter', function(done){
+        pgCache.remove(gKey+':0', function(err, result){
+          pgCache.insert( gKey, options, 0, function( e, s ){
+            pgCache.geoHashAgg(gKey+':0', limit, precision, {geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532'}, function(err, res){
+              should.not.exist(error);
+              Object.keys(res).length.should.equal( 17 );
+              done();
+            });
+          });
+        });
+      });
+    });
 });

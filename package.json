@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Esri/koop-pgcache",
   "dependencies": {
+    "ngeohash": "^0.6.0",
     "pg": "^4.2.0",
     "sphericalmercator": "^1.0.3"
   },

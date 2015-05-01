@@ -1,9 +1,11 @@
-var pg = require('pg');
-
-var sm = require('sphericalmercator'),
+var pg = require('pg'),
+  ngeohash = require('ngeohash'),
+  centroid = require('turf-centroid'),
+  sm = require('sphericalmercator'),
   merc = new sm({size:256});
 
 module.exports = {
+  geohashPrecision: 8, 
   infoTable: 'koopinfo', 
   timerTable: 'kooptimers',
   limit: 2000,
@@ -465,15 +467,27 @@ module.exports = {
 
   // inserts geojson features into the feature column of the given table
   _insertFeature: function(table, feature, i){
+    var featureString = JSON.stringify(feature).replace(/'/g, "");
+
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length ){
+      var geohash = this.createGeohash(feature, this.geohashPrecision);
       feature.geometry.crs = {"type":"name","properties":{"name":"EPSG:4326"}};
-      //return 'insert into "'+table+'" (feature, geom) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\', ST_GeomFromGeoJSON(\''+JSON.stringify(feature.geometry)+'\'));' ;
-      return 'insert into "'+table+'" (feature) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\');' ;
+      return 'insert into "'+table+'" (feature, geohash) VALUES (\''+featureString+'\', \''+geohash+'\');';
     } else {
-      return 'insert into "'+table+'" (feature) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\');' ;
+      return 'insert into "'+table+'" (feature) VALUES (\''+featureString+'\');' ;
     }
   },
 
+  createGeohash: function (feature, precision) {
+    if (!feature.geometry || !feature.geometry.coordinates) {
+      return;
+    }
+    if (feature.geometry.type !== 'Point') {
+      feature = centroid(feature);
+    }
+    var pnt = feature.geometry.coordinates;
+    return ngeohash.encode(pnt[1], pnt[0], precision);
+  },
 
   remove: function( key, callback){
     var self = this;
@@ -579,25 +593,37 @@ module.exports = {
     });
   },
 
+  isNumeric: function(num) {
+     return (num >=0 || num < 0);
+  },
+
   geoHashAgg: function (table, limit, precision, options, callback) {
     var self = this, 
       rowLimit = options.rowLimit || 10000, 
       pageLimit = options.pageLimit || 5000;
 
-    var whereFilter, geomFilter;
+    options.whereFilter = null, 
+    options.geomFilter = null;
+
+    // parse the where clause 
     if ( options.where ){
       if ( options.where != '1=1'){
         var clause = this.createWhereFromSql(options.where);
-        whereFilter = ' WHERE ' + clause;
+        options.whereFilter = ' WHERE ' + clause;
       } else {
-        whereFilter = ' WHERE ' + options.where;
+        options.whereFilter = ' WHERE ' + options.where;
       } 
     }
 
+    // parse the geometry into a bbox 
     if ( options.geometry ){
       var geom = this.parseGeometry( options.geometry );
-
-      if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
+      // make sure each coord is numeric
+      if (this.isNumeric(geom.xmin) && 
+        this.isNumeric(geom.xmax) && 
+        this.isNumeric(geom.ymin) && 
+        this.isNumeric(geom.ymax)
+      ){
         var box = geom;
         if (box.spatialReference.wkid != 4326){
           var mins = merc.inverse( [box.xmin, box.ymin] ),
@@ -609,26 +635,59 @@ module.exports = {
         }
 
         var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
-        geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
+        options.geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
       }
     }
 
-    var build = function (p) {
-      var agg = {};
-      var sql = 'SELECT count(id) as count, ST_GeoHash(st_geomfromgeojson((feature->>\'geometry\'::text)),'+p+') as geohash from "'+table+'"';
-      var countSql = 'select count(id) as count from "'+table+'"';
+    // recursively get geohash counts until we have a precision 
+    // that reutrns less than the row limit
+    // this will return the precision that will return the number 
+    // of geohashes less than the limit
+    var reducePrecision = function(table, p, options, callback){
+      self.countDistinctGeoHash(table, p, options, function(err, count){
+        console.log(count, limit, p)
+        if (parseInt(count, 0) > limit) {
+          reducePrecision(table, p-1, options, callback);
+        } else {
+          callback(err, p);
+        }
+      });
+    };
 
-      if (whereFilter) {
-        sql += whereFilter;
-        countSql += whereFilter;
+    var agg = {};
+    reducePrecision(table, precision, options, function (err, newPrecision) {
+      var geoHashSelect;
+      if (newPrecision < precision) {
+        geoHashSelect = 'substring(geohash,0,'+(newPrecision+1)+')';
+      } else {
+        geoHashSelect = 'geohash';
       }
-      if (geomFilter){
-        sql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
-        countSql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
+      var sql = 'SELECT count(id) as count, '+geoHashSelect+' as geohash from "'+table+'"';
+
+      // apply any filters to the sql
+      if (options.whereFilter) {
+        sql += options.whereFilter;
       }
+      if (options.geomFilter){
+        sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
+      }
+      sql += ' GROUP BY '+geoHashSelect;
+      self._query(sql, function(err, res){
+        if (!err && res && res.rows.length) {
+            console.log(sql, res.rows.length)
+            res.rows.forEach(function (row) {
+              console.log
+              agg[row.geohash] = row.count;
+            });
+            callback(err, agg);
+        } else {
+          callback(err, res);
+        }
+      });
+    }); 
 
       // get the count of features
-      self._query( countSql, function(err, res){
+      /*self._query( countSql, function(err, res){
         if (!err && res.rows.length && (res.rows[0].count > rowLimit)) {
           // count is too high, must page over the data 
           var npages = Math.ceil(res.rows[0].count/ pageLimit);
@@ -660,10 +719,25 @@ module.exports = {
             }
           });
         } 
-      });
-    }; 
-    // get the geohash with the given precision
-    build(precision);
+      });*/
+    //}; 
+  },
+
+  // Get the count of distinct geohashes for a query 
+  countDistinctGeoHash: function(table, precision, options, callback){
+    var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
+    // apply any filters to the sql
+    if (options.whereFilter) {
+      countSql += options.whereFilter;
+    }
+    if (options.geomFilter) {
+      countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
+    }
+    console.log(countSql);
+    this._query( countSql, function (err, res) {
+      callback(err, res.rows[0].count);
+    });
+    
   },
 
   buildGeoHashPages: function(sql, idFilters, options, callback){
@@ -751,7 +825,7 @@ module.exports = {
       // default to point geoms
       type = 'POINT';
     }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry('+type+', 4326)'];
+    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry('+type+', 4326)', 'geohash varchar(10)'];
     schema += props.join(',') + ')';
     return schema;
   }

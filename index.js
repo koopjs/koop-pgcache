@@ -414,7 +414,30 @@ module.exports = {
         feature = { geometry: { type: geojson.geomType || types[geojson.info.geometryType] } };
       }
 
-      self._createTable( table, self._buildSchemaFromFeature(feature), true, function(err, result){
+      // a list of indexes to create on the new table 
+      var indexes = [{
+        name: 'gix', 
+        using: 'GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))'
+      },{
+        name: 'substr3', 
+        using: 'btree (substring(geohash,0,3))'
+      },{
+        name: 'substr4',
+        using: 'btree (substring(geohash,0,4))'
+      },{
+        name: 'substr5',
+        using: 'btree (substring(geohash,0,5))'
+      },{
+        name: 'substr6',
+        using: 'btree (substring(geohash,0,6))'
+      },{
+        name: 'substr7',
+        using: 'btree (substring(geohash,0,7))'
+      },{
+        name: 'substr8',
+        using: 'btree (substring(geohash,0,8))'
+      }];
+      self._createTable( table, self._buildSchemaFromFeature(feature), indexes, function(err, result){
         if (err){
           callback(err, false);
           return;
@@ -645,7 +668,7 @@ module.exports = {
     // of geohashes less than the limit
     var reducePrecision = function(table, p, options, callback){
       self.countDistinctGeoHash(table, p, options, function(err, count){
-        console.log(count, limit, p)
+        //console.log(count, limit, p)
         if (parseInt(count, 0) > limit) {
           reducePrecision(table, p-1, options, callback);
         } else {
@@ -674,9 +697,8 @@ module.exports = {
       sql += ' GROUP BY '+geoHashSelect;
       self._query(sql, function(err, res){
         if (!err && res && res.rows.length) {
-            console.log(sql, res.rows.length)
+            //console.log(sql, res.rows.length)
             res.rows.forEach(function (row) {
-              console.log
               agg[row.geohash] = row.count;
             });
             callback(err, agg);
@@ -686,46 +708,13 @@ module.exports = {
       });
     }); 
 
-      // get the count of features
-      /*self._query( countSql, function(err, res){
-        if (!err && res.rows.length && (res.rows[0].count > rowLimit)) {
-          // count is too high, must page over the data 
-          var npages = Math.ceil(res.rows[0].count/ pageLimit);
-          var tasks = [];
-          for (var i=0; i < npages; i++){
-            var offset = (i * (pageLimit)) + 1;
-            var filter = ' id >= '+ offset + ' AND id < ' + (offset + pageLimit);
-            tasks.push(sql + ((options.whereFilter || options.geomFilter) ? ' AND '+filter : ' WHERE '+filter) + ' GROUP BY geohash');
-          }
-          callback(null, {
-            pages: tasks,
-            status: 'exceeds-limit' 
-          });
-        } else {        
-          
-          sql += ' GROUP BY geohash';
-          self._query(sql, function(err, res){
-            if (!err && res && res.rows.length) {
-              if (res.rows.length <= limit) {
-                res.rows.forEach(function (row) {
-                  agg[row.geohash] = row.count;
-                });
-                callback(err, agg);
-              } else {
-                build(p-1);
-              }
-            } else {
-              callback(err, res);
-            }
-          });
-        } 
-      });*/
-    //}; 
   },
 
   // Get the count of distinct geohashes for a query 
   countDistinctGeoHash: function(table, precision, options, callback){
-    var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
+    var geoHashSelect = 'substring(geohash,0,'+precision+')';
+    var countSql = 'WITH RECURSIVE t(n) AS (SELECT MIN('+geoHashSelect+') FROM "'+table+'" UNION SELECT (SELECT '+geoHashSelect+' FROM "'+table+'" WHERE '+geoHashSelect+' > n ORDER BY '+geoHashSelect+' LIMIT 1) FROM t WHERE n IS NOT NULL ) SELECT count(n) FROM t';
+    //var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
     // apply any filters to the sql
     if (options.whereFilter) {
       countSql += options.whereFilter;
@@ -733,35 +722,14 @@ module.exports = {
     if (options.geomFilter) {
       countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
     }
-    console.log(countSql);
     this._query( countSql, function (err, res) {
-      callback(err, res.rows[0].count);
+      if (err){
+        return callback(err, null); 
+      }
+      callback(null, res.rows[0].count);
     });
     
   },
-
-  buildGeoHashPages: function(sql, idFilters, options, callback){
-    var self = this;
-    var pageSql = []
-    idFilters.forEach(function (filter) {
-      pageSql.push(sql + ((options.whereFilter || options.geomFilter) ? ' AND '+filter : ' WHERE '+filter) + ' GROUP BY geohash'); 
-    });
-    callback('Not ready yet', null);
-  },
-
-  getGeoHashPage: function(sql, callback){
-    var agg = {};
-    this._query(sql, function(err, res){
-      if (!err && res && res.rows.length) {
-        res.rows.forEach(function (row) {
-          agg[row.geohash] = row.count;
-        });
-        callback(err, agg);
-      } else {
-        callback(err, res);
-      }
-    });
-  }, 
 
   //--------------
   // PRIVATE METHODS
@@ -783,9 +751,18 @@ module.exports = {
 
   },
 
+  //GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))', function(err){
+  _createIndex: function(table, name, using, callback){
+    var sql = 'CREATE INDEX '+name+' ON "'+table+'" USING '+ using;
+    this._query(sql, function(err){
+      if (callback) {
+        callback();
+      }
+    });
+  },
 
   // checks to see in the info table exists, create it if not
-  _createTable: function(name, schema, index, callback){
+  _createTable: function(name, schema, indexes, callback){
     var self = this;
     var sql = "select exists(select * from information_schema.tables where table_name='"+ name +"')";
     this._query(sql, function(err, result){
@@ -798,12 +775,20 @@ module.exports = {
               return;
             }
 
-            if ( index ){
-              self._query( 'CREATE INDEX '+name.replace(/:|-/g,'')+'_gix ON "'+name+'" USING GIST ( ST_GeomfromGeoJSON(feature->>\'geometry\') )', function(err){
-                if (callback) {
-                  callback();
+            if ( indexes && indexes.length ) {
+              var indexName = name.replace(/:|-/g,'');
+              var next = function(idx){
+                if (!idx){  
+                  if (callback) {
+                    callback();
+                  }
+                } else {
+                  self._createIndex(name, indexName+'_'+idx.name, idx.using, function(){
+                    next(indexes.pop());
+                  });
                 }
-              });
+              };
+              next(indexes.pop());
             } else {
               if (callback) {
                 callback();

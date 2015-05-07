@@ -668,7 +668,6 @@ module.exports = {
     // of geohashes less than the limit
     var reducePrecision = function(table, p, options, callback){
       self.countDistinctGeoHash(table, p, options, function(err, count){
-        //console.log(count, limit, p)
         if (parseInt(count, 0) > limit) {
           reducePrecision(table, p-1, options, callback);
         } else {
@@ -681,7 +680,7 @@ module.exports = {
     reducePrecision(table, precision, options, function (err, newPrecision) {
       var geoHashSelect;
       if (newPrecision < precision) {
-        geoHashSelect = 'substring(geohash,0,'+(newPrecision+1)+')';
+        geoHashSelect = 'substring(geohash,0,'+(newPrecision)+')';
       } else {
         geoHashSelect = 'geohash';
       }

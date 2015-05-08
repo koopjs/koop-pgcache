@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.1] - 2015-05-07
+### Changed 
+* Using a more optimized recursive query to get a count of distinct geohash cells at a given substring
+
+### Added
+* a series of substring indexes get placed on tables in the DB to support geohashing 
+
 ## [0.1.0] - 2015-04-30
 ### Added 
 * Added support for retrieving geohash aggregations directly from the DB. 

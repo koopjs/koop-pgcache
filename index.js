@@ -1,9 +1,11 @@
-var pg = require('pg');
-
-var sm = require('sphericalmercator'),
+var pg = require('pg'),
+  ngeohash = require('ngeohash'),
+  centroid = require('turf-centroid'),
+  sm = require('sphericalmercator'),
   merc = new sm({size:256});
 
 module.exports = {
+  geohashPrecision: 8, 
   infoTable: 'koopinfo', 
   timerTable: 'kooptimers',
   limit: 2000,
@@ -412,7 +414,30 @@ module.exports = {
         feature = { geometry: { type: geojson.geomType || types[geojson.info.geometryType] } };
       }
 
-      self._createTable( table, self._buildSchemaFromFeature(feature), true, function(err, result){
+      // a list of indexes to create on the new table 
+      var indexes = [{
+        name: 'gix', 
+        using: 'GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))'
+      },{
+        name: 'substr3', 
+        using: 'btree (substring(geohash,0,3))'
+      },{
+        name: 'substr4',
+        using: 'btree (substring(geohash,0,4))'
+      },{
+        name: 'substr5',
+        using: 'btree (substring(geohash,0,5))'
+      },{
+        name: 'substr6',
+        using: 'btree (substring(geohash,0,6))'
+      },{
+        name: 'substr7',
+        using: 'btree (substring(geohash,0,7))'
+      },{
+        name: 'substr8',
+        using: 'btree (substring(geohash,0,8))'
+      }];
+      self._createTable( table, self._buildSchemaFromFeature(feature), indexes, function(err, result){
         if (err){
           callback(err, false);
           return;
@@ -465,15 +490,27 @@ module.exports = {
 
   // inserts geojson features into the feature column of the given table
   _insertFeature: function(table, feature, i){
+    var featureString = JSON.stringify(feature).replace(/'/g, "");
+
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length ){
+      var geohash = this.createGeohash(feature, this.geohashPrecision);
       feature.geometry.crs = {"type":"name","properties":{"name":"EPSG:4326"}};
-      //return 'insert into "'+table+'" (feature, geom) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\', ST_GeomFromGeoJSON(\''+JSON.stringify(feature.geometry)+'\'));' ;
-      return 'insert into "'+table+'" (feature) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\');' ;
+      return 'insert into "'+table+'" (feature, geohash) VALUES (\''+featureString+'\', \''+geohash+'\');';
     } else {
-      return 'insert into "'+table+'" (feature) VALUES (\''+JSON.stringify(feature).replace(/'/g, "")+'\');' ;
+      return 'insert into "'+table+'" (feature) VALUES (\''+featureString+'\');' ;
     }
   },
 
+  createGeohash: function (feature, precision) {
+    if (!feature.geometry || !feature.geometry.coordinates) {
+      return;
+    }
+    if (feature.geometry.type !== 'Point') {
+      feature = centroid(feature);
+    }
+    var pnt = feature.geometry.coordinates;
+    return ngeohash.encode(pnt[1], pnt[0], precision);
+  },
 
   remove: function( key, callback){
     var self = this;
@@ -579,23 +616,37 @@ module.exports = {
     });
   },
 
-  geoHashAgg: function (table, limit, precision, options, callback) {
-    var self = this;
+  isNumeric: function(num) {
+     return (num >=0 || num < 0);
+  },
 
-    var whereFilter, geomFilter;
+  geoHashAgg: function (table, limit, precision, options, callback) {
+    var self = this, 
+      rowLimit = options.rowLimit || 10000, 
+      pageLimit = options.pageLimit || 5000;
+
+    options.whereFilter = null, 
+    options.geomFilter = null;
+
+    // parse the where clause 
     if ( options.where ){
       if ( options.where != '1=1'){
         var clause = this.createWhereFromSql(options.where);
-        whereFilter = ' WHERE ' + clause;
+        options.whereFilter = ' WHERE ' + clause;
       } else {
-        whereFilter = ' WHERE ' + options.where;
+        options.whereFilter = ' WHERE ' + options.where;
       } 
     }
 
+    // parse the geometry into a bbox 
     if ( options.geometry ){
       var geom = this.parseGeometry( options.geometry );
-
-      if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
+      // make sure each coord is numeric
+      if (this.isNumeric(geom.xmin) && 
+        this.isNumeric(geom.xmax) && 
+        this.isNumeric(geom.ymin) && 
+        this.isNumeric(geom.ymax)
+      ){
         var box = geom;
         if (box.spatialReference.wkid != 4326){
           var mins = merc.inverse( [box.xmin, box.ymin] ),
@@ -607,37 +658,76 @@ module.exports = {
         }
 
         var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
-        geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
+        options.geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
       }
     }
 
-    var build = function (p) {
-      var agg = {};
-      var sql = 'SELECT count(id) as count, ST_GeoHash(st_geomfromgeojson((feature->>\'geometry\'::text)),'+p+') as geohash from "'+table+'"';
-      if (whereFilter) {
-        sql += whereFilter;
+    // recursively get geohash counts until we have a precision 
+    // that reutrns less than the row limit
+    // this will return the precision that will return the number 
+    // of geohashes less than the limit
+    var reducePrecision = function(table, p, options, callback){
+      self.countDistinctGeoHash(table, p, options, function(err, count){
+        if (parseInt(count, 0) > limit) {
+          reducePrecision(table, p-1, options, callback);
+        } else {
+          callback(err, p);
+        }
+      });
+    };
+
+    var agg = {};
+    reducePrecision(table, precision, options, function (err, newPrecision) {
+      var geoHashSelect;
+      if (newPrecision < precision) {
+        geoHashSelect = 'substring(geohash,0,'+(newPrecision)+')';
+      } else {
+        geoHashSelect = 'geohash';
       }
-      if (geomFilter){
-        sql += ((whereFilter) ? ' AND ' : ' WHERE ') + geomFilter;
+      var sql = 'SELECT count(id) as count, '+geoHashSelect+' as geohash from "'+table+'"';
+
+      // apply any filters to the sql
+      if (options.whereFilter) {
+        sql += options.whereFilter;
       }
-      sql += ' GROUP BY geohash;';
+      if (options.geomFilter){
+        sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
+      }
+      sql += ' GROUP BY '+geoHashSelect;
       self._query(sql, function(err, res){
         if (!err && res && res.rows.length) {
-          if (res.rows.length <= limit) {
+            //console.log(sql, res.rows.length)
             res.rows.forEach(function (row) {
               agg[row.geohash] = row.count;
             });
             callback(err, agg);
-          } else {
-            build(p-1);
-          }
         } else {
           callback(err, res);
         }
       });
-    }; 
-    // get the geohash with the given precision
-    build(precision);
+    }); 
+
+  },
+
+  // Get the count of distinct geohashes for a query 
+  countDistinctGeoHash: function(table, precision, options, callback){
+    var geoHashSelect = 'substring(geohash,0,'+precision+')';
+    var countSql = 'WITH RECURSIVE t(n) AS (SELECT MIN('+geoHashSelect+') FROM "'+table+'" UNION SELECT (SELECT '+geoHashSelect+' FROM "'+table+'" WHERE '+geoHashSelect+' > n ORDER BY '+geoHashSelect+' LIMIT 1) FROM t WHERE n IS NOT NULL ) SELECT count(n) FROM t';
+    //var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
+    // apply any filters to the sql
+    if (options.whereFilter) {
+      countSql += options.whereFilter;
+    }
+    if (options.geomFilter) {
+      countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
+    }
+    this._query( countSql, function (err, res) {
+      if (err){
+        return callback(err, null); 
+      }
+      callback(null, res.rows[0].count);
+    });
+    
   },
 
   //--------------
@@ -660,9 +750,18 @@ module.exports = {
 
   },
 
+  //GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))', function(err){
+  _createIndex: function(table, name, using, callback){
+    var sql = 'CREATE INDEX '+name+' ON "'+table+'" USING '+ using;
+    this._query(sql, function(err){
+      if (callback) {
+        callback();
+      }
+    });
+  },
 
   // checks to see in the info table exists, create it if not
-  _createTable: function(name, schema, index, callback){
+  _createTable: function(name, schema, indexes, callback){
     var self = this;
     var sql = "select exists(select * from information_schema.tables where table_name='"+ name +"')";
     this._query(sql, function(err, result){
@@ -675,12 +774,20 @@ module.exports = {
               return;
             }
 
-            if ( index ){
-              self._query( 'CREATE INDEX '+name.replace(/:|-/g,'')+'_gix ON "'+name+'" USING GIST ( ST_GeomfromGeoJSON(feature->>\'geometry\') )', function(err){
-                if (callback) {
-                  callback();
+            if ( indexes && indexes.length ) {
+              var indexName = name.replace(/:|-/g,'');
+              var next = function(idx){
+                if (!idx){  
+                  if (callback) {
+                    callback();
+                  }
+                } else {
+                  self._createIndex(name, indexName+'_'+idx.name, idx.using, function(){
+                    next(indexes.pop());
+                  });
                 }
-              });
+              };
+              next(indexes.pop());
             } else {
               if (callback) {
                 callback();
@@ -702,7 +809,7 @@ module.exports = {
       // default to point geoms
       type = 'POINT';
     }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry('+type+', 4326)'];
+    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry('+type+', 4326)', 'geohash varchar(10)'];
     schema += props.join(',') + ')';
     return schema;
   }

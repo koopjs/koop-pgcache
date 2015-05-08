@@ -1,6 +1,6 @@
 {
   "name": "koop-pgcache",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A postgis cache for koop",
   "main": "index.js",
   "scripts": {
@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/Esri/koop-pgcache",
   "dependencies": {
+    "ngeohash": "^0.6.0",
     "pg": "^4.2.0",
-    "sphericalmercator": "^1.0.3"
+    "sphericalmercator": "^1.0.3",
+    "turf-centroid": "^1.1.2"
   },
   "directories": {
     "test": "test"

@@ -22,7 +22,7 @@ module.exports = {
     this.client = new pg.Client( conn );
     this.client.connect(function(err) {
       if ( err ){
-        console.log('Could not connect to the database');
+        console.log('Could not connect to the database: ' + err.message);
         process.exit();
       } else {
         // creates table only if they dont exist

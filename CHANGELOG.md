@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.2] - 2015-05-20
+### Changed
+* Fixed OR filters to not append a problematic 'AND' to queries 
+
 ## [0.1.1] - 2015-05-07
 ### Changed 
 * Using a more optimized recursive query to get a count of distinct geohash cells at a given substring
@@ -33,6 +37,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[0.1.2]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.1
 [0.1.0]: https://github.com/Esri/koop-pgcache/compare/v0.0.6...v0.1.0
 [0.0.6]: https://github.com/Esri/koop-pgcache/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/Esri/koop-pgcache/compare/v0.0.4...v0.0.5

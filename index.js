@@ -226,7 +226,13 @@ module.exports = {
         });
       }
     });
-    return andWhere.join(' AND ') + (( orWhere.length ) ? ' AND (' + orWhere.join(' OR ') +')' : '');
+    var sql = [];
+    if (andWhere.length) {
+      sql.push(andWhere.join(' AND '));
+    } else if (orWhere.length) {
+      sql.push('(' + orWhere.join(' OR ') +')');
+    }
+    return sql.join(' AND ');
   },
   
   // get data out of the db
@@ -694,9 +700,9 @@ module.exports = {
         sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
       }
       sql += ' GROUP BY '+geoHashSelect;
+      self.log.info('GEOHASH Query', sql);
       self._query(sql, function(err, res){
         if (!err && res && res.rows.length) {
-            //console.log(sql, res.rows.length)
             res.rows.forEach(function (row) {
               agg[row.geohash] = row.count;
             });

@@ -92,6 +92,15 @@ describe('pgCache Model Tests', function(){
           });
         });
 
+        it('should select data from db with an OR filter', function(done){
+          pgCache.select( key, { layer: 0, where: '\'total precip\' = \'0.31\' OR \'total precip\' > \'0.5\'' }, function( error, success ){
+            should.not.exist(error);
+            should.exist(success[0].features);
+            success[0].features.length.should.equal(120);
+            done();
+          });
+        });
+
         it('should insert data with no features', function(done){
           var snowKey = 'test:snow:data';
           pgCache.insert( snowKey, {name: 'no-data', geomType: 'Point', features:[]}, 0, function( error, success ){
@@ -182,7 +191,7 @@ describe('pgCache Model Tests', function(){
             pgCache.select( gKey, { layer: 0, where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land = \'Poland\')  AND Art = \'BRL\'' },            function(err, res){
 
               should.not.exist(error);
-              res[0].features.length.should.equal(5);
+              res[0].features.length.should.equal(7);
 
               pgCache.remove(gKey+':0', function(err, result){
                 should.not.exist( err );
@@ -305,7 +314,19 @@ describe('pgCache Model Tests', function(){
           pgCache.insert( gKey, options, 0, function( e, s ){
             pgCache.geoHashAgg(gKey+':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land  = \'Poland\')  AND Art = \'BRL\''}, function(err, res){
               should.not.exist(error);
-              Object.keys(res).length.should.equal( 5 );
+              Object.keys(res).length.should.equal( 7 );
+              done();
+            });
+          });
+        });
+      });
+
+      it('should return a geohash when passing an OR where clause', function(done){
+        pgCache.remove(gKey+':0', function(err, result){
+          pgCache.insert( gKey, options, 0, function( e, s ){
+            pgCache.geoHashAgg(gKey+':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 OR (Land = \'Germany\' OR Land  = \'Poland\') AND Art = \'BRL\''}, function(err, res){
+              should.not.exist(error);
+              Object.keys(res).length.should.equal( 10 );
               done();
             });
           });

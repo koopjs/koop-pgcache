@@ -443,6 +443,18 @@ module.exports = {
         name: 'substr8',
         using: 'btree (substring(geohash,0,8))'
       }];
+
+      // for each property in the data create an index
+      if (geojson.info && geojson.info.fields) {
+        geojson.info.fields.forEach( function(field) {
+          var idx = {
+            name: field,
+            using: 'btree ((feature->\'properties\'->>\'' + field + '\'))'
+          };
+          indexes.push(idx);
+        });
+      }
+
       self._createTable( table, self._buildSchemaFromFeature(feature), indexes, function(err, result){
         if (err){
           callback(err, false);
@@ -642,6 +654,8 @@ module.exports = {
       } else {
         options.whereFilter = ' WHERE ' + options.where;
       } 
+      // replace ilike and %% for faster filter queries...
+      options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '');
     }
 
     // parse the geometry into a bbox 
@@ -718,8 +732,8 @@ module.exports = {
   // Get the count of distinct geohashes for a query 
   countDistinctGeoHash: function(table, precision, options, callback){
     var geoHashSelect = 'substring(geohash,0,'+precision+')';
-    var countSql = 'WITH RECURSIVE t(n) AS (SELECT MIN('+geoHashSelect+') FROM "'+table+'" UNION SELECT (SELECT '+geoHashSelect+' FROM "'+table+'" WHERE '+geoHashSelect+' > n ORDER BY '+geoHashSelect+' LIMIT 1) FROM t WHERE n IS NOT NULL ) SELECT count(n) FROM t';
-    //var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
+    //var countSql = 'WITH RECURSIVE t(n) AS (SELECT MIN('+geoHashSelect+') FROM "'+table+'" UNION SELECT (SELECT '+geoHashSelect+' FROM "'+table+'" WHERE '+geoHashSelect+' > n ORDER BY '+geoHashSelect+' LIMIT 1) FROM t WHERE n IS NOT NULL ) SELECT count(n) FROM t';
+    var countSql = 'select count(DISTINCT(substring(geohash,0,'+precision+'))) as count from "'+table+'"';
     // apply any filters to the sql
     if (options.whereFilter) {
       countSql += options.whereFilter;
@@ -727,7 +741,8 @@ module.exports = {
     if (options.geomFilter) {
       countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter;
     }
-    this._query( countSql, function (err, res) {
+    this.log.debug(countSql)
+    this._query(countSql, function (err, res) {
       if (err){
         return callback(err, null); 
       }

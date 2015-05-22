@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.3] - 2015-05-21
+### Changed
+* When inserting data we now check for a fields array, if it exists we create an index on that field. Helps make queries faster. 
+
 ## [0.1.2] - 2015-05-20
 ### Changed
 * Fixed OR filters to not append a problematic 'AND' to queries 
@@ -37,6 +41,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[0.1.3]: https://github.com/Esri/koop-pgcache/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.1
 [0.1.0]: https://github.com/Esri/koop-pgcache/compare/v0.0.6...v0.1.0

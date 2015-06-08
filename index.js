@@ -699,7 +699,7 @@ module.exports = {
     var agg = {};
     reducePrecision(table, precision, options, function (err, newPrecision) {
       var geoHashSelect;
-      if (newPrecision < precision) {
+      if (newPrecision <= precision) {
         geoHashSelect = 'substring(geohash,0,'+(newPrecision)+')';
       } else {
         geoHashSelect = 'geohash';

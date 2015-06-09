@@ -262,7 +262,7 @@ module.exports = {
         }
 
         // parse the geometry param from GeoServices REST
-        var box = self.parseGeometry(options. geometry)
+        var box = self.parseGeometry(options.geometry)
         if (box) {
           select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax

@@ -637,7 +637,6 @@ module.exports = {
     var self = this
       // rowLimit = options.rowLimit || 10000,
       // pageLimit = options.pageLimit || 5000
-
     options.whereFilter = null
     options.geomFilter = null
 
@@ -676,38 +675,34 @@ module.exports = {
 
     var agg = {}
     reducePrecision(table, precision, options, function (err, newPrecision) {
-      if (err) this.log.error(err)
+      if (err) self.log.error(err)
       var geoHashSelect
       if (newPrecision <= precision) {
         geoHashSelect = 'substring(geohash,0,' + (newPrecision) + ')'
       } else {
-        if (newPrecision < precision) {
-          geoHashSelect = 'substring(geohash,0,' + (newPrecision) + ')'
-        } else {
-          geoHashSelect = 'geohash'
-        }
-        var sql = 'SELECT count(id) as count, ' + geoHashSelect + ' as geohash from "' + table + '"'
-
-        // apply any filters to the sql
-        if (options.whereFilter) {
-          sql += options.whereFilter
-        }
-        if (options.geomFilter) {
-          sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
-        }
-        sql += ' GROUP BY ' + geoHashSelect
-        self.log.info('GEOHASH Query', sql)
-        self._query(sql, function (err, res) {
-          if (!err && res && res.rows.length) {
-            res.rows.forEach(function (row) {
-              agg[row.geohash] = row.count
-            })
-            callback(err, agg)
-          } else {
-            callback(err, res)
-          }
-        })
+        geoHashSelect = 'geohash'
       }
+      var sql = 'SELECT count(id) as count, ' + geoHashSelect + ' as geohash from "' + table + '"'
+
+      // apply any filters to the sql
+      if (options.whereFilter) {
+        sql += options.whereFilter
+      }
+      if (options.geomFilter) {
+        sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
+      }
+      sql += ' GROUP BY ' + geoHashSelect
+      self.log.info('GEOHASH Query', sql)
+      self._query(sql, function (err, res) {
+        if (!err && res && res.rows.length) {
+          res.rows.forEach(function (row) {
+            agg[row.geohash] = row.count
+          })
+          callback(err, agg)
+        } else {
+          callback(err, res)
+        }
+      })
     })
 
   },

@@ -49,26 +49,13 @@ module.exports = {
       }
     }
 
-    if ( options.geometry ){
-      var geom = this.parseGeometry( options.geometry );
-
-      if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
-        var box = geom;
-        if (box.spatialReference.wkid != 4326){
-          var mins = merc.inverse( [box.xmin, box.ymin] ),
-            maxs = merc.inverse( [box.xmax, box.ymax] );
-          box.xmin = mins[0];
-          box.ymin = mins[1];
-          box.xmax = maxs[0];
-          box.ymax = maxs[1];
-        }
-
+    var box = this.parseGeometry( options.geometry );
+    if ( box ){  
         select += (options.where ) ? ' AND ' : ' WHERE ';
         var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
         //select += 'geom && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
         select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
       }
-    }
 
     this._query(select, function(err, result){
       if ( err || !result || !result.rows || !result.rows.length ){
@@ -283,26 +270,13 @@ module.exports = {
           }
 
           // parse the geometry param from GeoServices REST
-          if ( options.geometry ){
-            var geom = self.parseGeometry( options.geometry );
-
-            if ((geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0)){
-              var box = geom;
-              if (box.spatialReference.wkid != 4326){
-                var mins = merc.inverse( [box.xmin, box.ymin] ),
-                  maxs = merc.inverse( [box.xmax, box.ymax] );
-                box.xmin = mins[0];
-                box.ymin = mins[1];
-                box.xmax = maxs[0];
-                box.ymax = maxs[1];
-              }
-
+          var box = self.parseGeometry( options. geometry );
+          if ( box ){
               select += (options.where || options.idFilter) ? ' AND ' : ' WHERE ';
               var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
               select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
               //select += 'ST_Intersects(ST_GeomFromGeoJSON(feature->>\'geometry\'), ST_MakeEnvelope('+box.xmin+','+box.ymin+','+box.xmax+','+box.ymax+'))';
             }
-          }
 
           self._query( select.replace(/ id, feature->>'properties' as props, feature->>'geometry' as geom /, ' count(*) as count '), function(err, result){
             if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit) ){
@@ -321,6 +295,7 @@ module.exports = {
 
             } else {
               // ensure id order 
+              console.log(options)
               select += " ORDER BY id";
               if ( options.limit ) {
                 select += ' LIMIT ' + options.limit;
@@ -367,25 +342,44 @@ module.exports = {
 
   parseGeometry: function( geometry ){
     var geom = geometry;
+    var bbox;
+    if (!geom) {
+      return false
+    }
     if ( typeof( geom ) == 'string' ){
       try {
         geom = JSON.parse( geom );
       } catch(e){
         try {
           if ( geom.split(',').length == 4 ){
+            bbox =  { spatialReference: {wkid: 4326} };
             var extent = geom.split(',');
-            geom = { spatialReference: {wkid: 4326} };
-            geom.xmin = extent[0];
-            geom.ymin = extent[1];
-            geom.xmax = extent[2];
-            geom.ymax = extent[3];
+            bbox.xmin = extent[0];
+            bbox.ymin = extent[1];
+            bbox.xmax = extent[2];
+            bbox.ymax = extent[3];
           }
         } catch(error){
           this.log.error('Error building bbox from query ' + geometry);
         }
       }
+    } else if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
+      // is this a valid geometry object that has a spatial ref different than 4326?
+      var mins = merc.inverse( [geom.xmin, geom.ymin] ),
+        maxs = merc.inverse( [geom.xmax, geom.ymax] );
+      bbox =  { spatialReference: {wkid: 4326} };
+      bbox.xmin = mins[0];
+      bbox.ymin = mins[1];
+      bbox.xmax = maxs[0];
+      bbox.ymax = maxs[1];
     }
-    return geom;
+    //check to make sure everything is numeric
+    if (this.isNumeric(bbox.xmin) && this.isNumeric(bbox.xmax) && 
+        this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {
+      return bbox
+    } else {
+      return false
+    }
   },
 
   // create a collection and insert features
@@ -407,8 +401,7 @@ module.exports = {
       info.host = geojson.host;
    
       var table = key+':'+layerId;
-
-      var feature = (geojson[0]) ? geojson[0].features[0] : geojson.features[0];
+      var feature = (geojson.length) ? geojson[0].features[0] : geojson.features[0];
       
       var types = {
         'esriGeometryPolyline': 'LineString',
@@ -658,28 +651,11 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '');
     }
 
+    var box = this.parseGeometry( options.geometry );
     // parse the geometry into a bbox 
-    if ( options.geometry ){
-      var geom = this.parseGeometry( options.geometry );
-      // make sure each coord is numeric
-      if (this.isNumeric(geom.xmin) && 
-        this.isNumeric(geom.xmax) && 
-        this.isNumeric(geom.ymin) && 
-        this.isNumeric(geom.ymax)
-      ){
-        var box = geom;
-        if (box.spatialReference.wkid != 4326){
-          var mins = merc.inverse( [box.xmin, box.ymin] ),
-            maxs = merc.inverse( [box.xmax, box.ymax] );
-          box.xmin = mins[0];
-          box.ymin = mins[1];
-          box.xmax = maxs[0];
-          box.ymax = maxs[1];
-        }
-
-        var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
-        options.geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
-      }
+    if ( box ){
+      var bbox = box.xmin+' '+box.ymin+','+box.xmax+' '+box.ymax;
+      options.geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D('+bbox+')\'::box3d,4326)';
     }
 
     // recursively get geohash counts until we have a precision 

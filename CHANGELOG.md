@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.4] - 2015-06-09
+### Changed
+* Refactored to fit [Standard](https://github.com/feross/standard) style
+
 ## [0.1.3] - 2015-05-21
 ### Changed
 * When inserting data we now check for a fields array, if it exists we create an index on that field. Helps make queries faster. 

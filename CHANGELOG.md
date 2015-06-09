@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.5] - 2015-06-09
+### Changed
+* Refactored to fit [Standard](https://github.com/feross/standard) style
+
 ## [0.1.4] - 2015-06-08
 ### Changed 
 * Needed a better check on the value of the geohash precision when reducing precision in the DB

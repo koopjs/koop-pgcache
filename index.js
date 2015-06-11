@@ -713,11 +713,15 @@ module.exports = {
    * @param {String} table to get data from
    * @param {String} field to generate stats from
    * @param {String} outName the name of the stat field
-   * @param {String} type - the stat type: min, max, avg, count
+   * @param {String} type - the stat type: min, max, avg, count, var, stddev
    * @param {Object} options - optional params for the query: where, geometry, groupBy
    * @param {Function} callback - when the query is done
    */
   getStat: function (table, field, outName, type, options, callback) {
+    // force var to be variance in SQL
+    if (type === 'var') {
+      type = 'variance'
+    }
     // build sql
     var fieldName
     if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {

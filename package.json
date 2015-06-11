@@ -1,33 +1,38 @@
 {
   "name": "koop-pgcache",
-  "version": "0.1.5",
-  "description": "A postgis cache for koop",
-  "main": "index.js",
-  "scripts": {
-    "test": "standard && mocha test/ -t 20000"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/Esri/koop-pgcache.git"
-  },
+  "description": "A PostGIS data cache for Koop.",
+  "version": "0.1.6",
   "author": "Chris Helm",
-  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Esri/koop-pgcache/issues"
+    "url": "https://github.com/koopjs/koop-pgcache/issues"
   },
-  "homepage": "https://github.com/Esri/koop-pgcache",
   "dependencies": {
     "ngeohash": "^0.6.0",
     "pg": "^4.2.0",
     "sphericalmercator": "^1.0.3",
     "turf-centroid": "^1.1.2"
   },
-  "directories": {
-    "test": "test"
-  },
   "devDependencies": {
     "should": "^4.6.1",
-    "winston": "^0.9.0",
-    "standard": "^3.3.0"
-  }
+    "standard": "^3.3.0",
+    "winston": "^0.9.0"
+  },
+  "homepage": "https://github.com/koopjs/koop-pgcache",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/koopjs/koop-pgcache.git"
+  },
+  "scripts": {
+    "test": "standard && mocha test/ -t 20000"
+  },
+  "keywords": [
+    "koop",
+    "postgis",
+    "cache",
+    "data",
+    "plugin",
+    "etl"
+  ]
 }

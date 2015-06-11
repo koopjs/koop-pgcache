@@ -51,8 +51,7 @@ module.exports = {
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      // select += 'geom && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
-      select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
+      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
@@ -105,9 +104,8 @@ module.exports = {
   },
 
   createRangeFilterFromSql: function (sql, fields) {
-
-    // var paramIndex = 0
     var terms, type
+
     if (sql.indexOf(' >= ') > -1) {
       terms = sql.split(' >= ')
       type = '>='
@@ -128,6 +126,7 @@ module.exports = {
       // paramIndex = 1
       type = '<'
     }
+
     if (terms.length !== 2) { return }
 
     var fieldName = terms[0].replace(/\'([^\']*)'/g, '$1')
@@ -137,10 +136,9 @@ module.exports = {
     if (fields) {
       value = this.applyCodedDomains(fieldName, value, fields)
     }
-    // if (dataType === 'date') {
-    //  value = moment(value.replace(/(\')|(date \')/g, ''), this.dateFormat).toDate().getTime()
-    // }
+
     var field = ' (feature->\'properties\'->>\'' + fieldName + '\')'
+
     if (parseInt(value, 10) || parseInt(value, 10) === 0) {
       if (((parseFloat(value) === parseInt(value, 10)) && !isNaN(value)) || value === 0) {
         field += '::float::int'
@@ -217,20 +215,6 @@ module.exports = {
   // get data out of the db
   select: function (key, options, callback) {
     var self = this
-    // var layer = 0
-    // var error = false,
-    //   totalLayers,
-    //   // queryOpts = {},
-    //   allLayers = []
-
-    // closure to check each layer and send back when done
-    // var collect = function (err, data) {
-    //   if (err) error = err
-    //   allLayers.push(data)
-    //   if (allLayers.length === totalLayers) {
-    //     callback(error, allLayers)
-    //   }
-    // }
 
     this._query('select info from "' + this.infoTable + '" where id=\'' + (key + ':' + (options.layer || 0) + ':info') + '\'', function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
@@ -380,8 +364,6 @@ module.exports = {
   insert: function (key, geojson, layerId, callback) {
     var self = this
     var info = {}
-      // count = 0
-      // error = null
 
     info.name = geojson.name
     info.updated_at = geojson.updated_at
@@ -471,10 +453,9 @@ module.exports = {
 
   insertPartial: function (key, geojson, layerId, callback) {
     var self = this
-    // var info = {}
-
     var sql = 'BEGIN'
     var table = key + ':' + layerId
+
     geojson.features.forEach(function (feature, i) {
       sql += self._insertFeature(table, feature, i)
     })
@@ -524,7 +505,6 @@ module.exports = {
         // nothing to remove
         callback(null, true)
       } else {
-        // var info = result.rows[0].info
         self.dropTable(key, function (err, result) {
           if (err) self.log.error(err)
           self._query('delete from "' + self.infoTable + '" where id=\'' + (key + ':info') + '\'', function (err, result) {
@@ -580,7 +560,6 @@ module.exports = {
   serviceGet: function (type, id, callback) {
     var self = this
     var sql
-    // this._createTable(type, '(id varchar(100), host varchar(100))', null, function (err, result) {
     if (!id) {
       sql = 'select * from "' + type + '"'
       self._query(sql, function (err, res) {
@@ -597,7 +576,6 @@ module.exports = {
         }
       })
     }
-    // })
   },
 
   timerSet: function (key, expires, callback) {
@@ -635,8 +613,6 @@ module.exports = {
 
   geoHashAgg: function (table, limit, precision, options, callback) {
     var self = this
-      // rowLimit = options.rowLimit || 10000,
-      // pageLimit = options.pageLimit || 5000
     options.whereFilter = null
     options.geomFilter = null
 
@@ -656,7 +632,7 @@ module.exports = {
     // parse the geometry into a bbox
     if (box) {
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      options.geomFilter = ' ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
+      options.geomFilter = " ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     // recursively get geohash counts until we have a precision
@@ -674,14 +650,18 @@ module.exports = {
     }
 
     var agg = {}
+
     reducePrecision(table, precision, options, function (err, newPrecision) {
       if (err) self.log.error(err)
+
       var geoHashSelect
+
       if (newPrecision <= precision) {
         geoHashSelect = 'substring(geohash,0,' + (newPrecision) + ')'
       } else {
         geoHashSelect = 'geohash'
       }
+
       var sql = 'SELECT count(id) as count, ' + geoHashSelect + ' as geohash from "' + table + '"'
 
       // apply any filters to the sql
@@ -691,6 +671,7 @@ module.exports = {
       if (options.geomFilter) {
         sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
       }
+
       sql += ' GROUP BY ' + geoHashSelect
       self.log.info('GEOHASH Query', sql)
       self._query(sql, function (err, res) {
@@ -709,28 +690,27 @@ module.exports = {
 
   // Get the count of distinct geohashes for a query
   countDistinctGeoHash: function (table, precision, options, callback) {
-    // var geoHashSelect = 'substring(geohash,0,' + precision + ')'
-    // var countSql = 'WITH RECURSIVE t(n) AS (SELECT MIN(' + geoHashSelect + ') FROM "' + table + '" UNION SELECT (SELECT ' + geoHashSelect + ' FROM "' + table + '" WHERE ' + geoHashSelect + ' > n ORDER BY ' + geoHashSelect + ' LIMIT 1) FROM t WHERE n IS NOT NULL) SELECT count(n) FROM t'
     var countSql = 'select count(DISTINCT(substring(geohash,0,' + precision + '))) as count from "' + table + '"'
+
     // apply any filters to the sql
     if (options.whereFilter) {
       countSql += options.whereFilter
     }
+
     if (options.geomFilter) {
       countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
     }
+
     this.log.debug(countSql)
     this._query(countSql, function (err, res) {
-      if (err) {
-        return callback(err, null)
-      }
+      if (err) return callback(err, null)
       callback(null, res.rows[0].count)
     })
   },
 
-  // --------------
+  // ---------------
   // PRIVATE METHODS
-  // -------------
+  // ---------------
 
   _query: function (sql, callback) {
     Pg.connect(this.conn, function (err, client, done) {
@@ -745,10 +725,8 @@ module.exports = {
         }
       })
     })
-
   },
 
-  // GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))', function (err) {
   _createIndex: function (table, name, using, callback) {
     var sql = 'CREATE INDEX ' + name + ' ON "' + table + '" USING ' + using
     this._query(sql, function (err) {

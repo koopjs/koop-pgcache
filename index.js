@@ -720,7 +720,7 @@ module.exports = {
   getStat: function (table, field, outName, type, options, callback) {
     // build sql
     var fieldName
-    if (type === 'avg' || type === 'sum') {
+    if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {
       fieldName = "(feature->'properties'->>'" + field + "')::int"
     } else {
       fieldName = "feature->'properties'->>'" + field + "'"

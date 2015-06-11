@@ -271,7 +271,6 @@ module.exports = {
 
           } else {
             // ensure id order \
-            console.log(options)
             select += ' ORDER BY id'
             if (options.limit) {
               select += ' LIMIT ' + options.limit
@@ -705,6 +704,84 @@ module.exports = {
     this._query(countSql, function (err, res) {
       if (err) return callback(err, null)
       callback(null, res.rows[0].count)
+    })
+  },
+
+  /**
+   * Gets a statistic on one field at a time
+   * Supports where and geometry filters and group by
+   * @param {String} table to get data from
+   * @param {String} field to generate stats from
+   * @param {String} outName the name of the stat field
+   * @param {String} type - the stat type: min, max, avg, count, var, stddev
+   * @param {Object} options - optional params for the query: where, geometry, groupBy
+   * @param {Function} callback - when the query is done
+   */
+  getStat: function (table, field, outName, type, options, callback) {
+    // force var to be variance in SQL
+    if (type === 'var') {
+      type = 'variance'
+    }
+    // build sql
+    var fieldName
+    if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {
+      fieldName = "(feature->'properties'->>'" + field + "')::int"
+    } else {
+      fieldName = "feature->'properties'->>'" + field + "'"
+    }
+    var fieldSql = type.toLowerCase() + '(' + fieldName + ')::int as "' + outName + '\"'
+
+    // add groupby
+    var groupByAs, groupBy
+    if (options.groupby) {
+      if (Array.isArray(options.groupby)) {
+        var gField
+        groupByAs = []
+        groupBy = []
+        options.groupby.forEach(function (f) {
+          gField = "feature->'properties'->>'" + f + "'"
+          groupBy.push(gField)
+          groupByAs.push(gField + ' as "' + f + '"')
+        })
+        groupBy = groupBy.join(', ')
+        groupByAs = groupByAs.join(', ')
+      } else {
+        groupBy = "feature->'properties'->>'" + options.groupby + "'"
+        groupByAs = groupBy + ' as "' + options.groupby + '"'
+      }
+    }
+
+    var sql = 'select ' + fieldSql + ((groupByAs) ? ', ' + groupByAs : '') + ' from "' + table + '"'
+
+    // apply where and geometry filter
+    if (options.where) {
+      if (options.where !== '1=1') {
+        var clause = this.createWhereFromSql(options.where)
+        sql += ' WHERE ' + clause
+      } else {
+        sql += ' WHERE ' + options.where
+      }
+      // replace ilike and %% for faster filter queries...
+      options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
+    }
+
+    var box = this.parseGeometry(options.geometry)
+    if (box) {
+      sql += (options.where) ? ' AND ' : ' WHERE '
+      var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
+      sql += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+    }
+
+    if (groupBy) {
+      sql += 'group by ' + groupBy
+    }
+
+    // issue query
+    this._query(sql, function (err, result) {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, result.rows)
     })
   },
 

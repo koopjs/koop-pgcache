@@ -2,32 +2,37 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.6] - 2015-06-11
+### Changed
+* Update URLs in package.json for org change
+* Improve documentation in README.md
+
 ## [0.1.5] - 2015-06-09
 ### Changed
 * Refactored to fit [Standard](https://github.com/feross/standard) style
 
 ## [0.1.4] - 2015-06-08
-### Changed 
+### Changed
 * Needed a better check on the value of the geohash precision when reducing precision in the DB
 
 ## [0.1.3] - 2015-05-21
 ### Changed
-* When inserting data we now check for a fields array, if it exists we create an index on that field. Helps make queries faster. 
+* When inserting data we now check for a fields array, if it exists we create an index on that field. Helps make queries faster.
 
 ## [0.1.2] - 2015-05-20
 ### Changed
-* Fixed OR filters to not append a problematic 'AND' to queries 
+* Fixed OR filters to not append a problematic 'AND' to queries
 
 ## [0.1.1] - 2015-05-07
-### Changed 
+### Changed
 * Using a more optimized recursive query to get a count of distinct geohash cells at a given substring
 
 ### Added
-* a series of substring indexes get placed on tables in the DB to support geohashing 
+* a series of substring indexes get placed on tables in the DB to support geohashing
 
 ## [0.1.0] - 2015-04-30
-### Added 
-* Added support for retrieving geohash aggregations directly from the DB. 
+### Added
+* Added support for retrieving geohash aggregations directly from the DB.
 
 ## [0.0.6] - 2015-04-28
 ### Changed
@@ -38,18 +43,20 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * fixed an issue where geometry filters and idFilters were in conflict in the generated sql
 
 ## [0.0.4] - 2015-04-13
-### Added 
-* Support for providers to filter queries with an idFilter param. This optional param is appended to the where clause and allows the query to filter on table id instead of property values. 
+### Added
+* Support for providers to filter queries with an idFilter param. This optional param is appended to the where clause and allows the query to filter on table id instead of property values.
 
 ## [0.0.3] - 2015-04-11
-### Changed 
-* Better logic for `<` or `>` operators in where clauses 
+### Changed
+* Better logic for `<` or `>` operators in where clauses
 
 ## [0.0.2] - 2015-04-03
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
-[0.1.3]: https://github.com/Esri/koop-pgcache/compare/v0.1.3...v0.1.4
+[0.1.6]: https://github.com/Esri/koop-pgcache/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/Esri/koop-pgcache/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/Esri/koop-pgcache/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Esri/koop-pgcache/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.1

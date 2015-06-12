@@ -15,6 +15,7 @@ before(function (done) {
   var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
 
   pgCache.connect(config.db.conn, {}, function () {
+    // console.log('Could not connect to the db', err)
     done()
   })
 
@@ -27,7 +28,12 @@ describe('pgCache Model Tests', function () {
   describe('when caching a github file', function () {
 
     beforeEach(function (done) {
-      pgCache.insert(key, repoData[0], 0, done)
+      pgCache.insert(key, repoData[0], 0, function (err) {
+        if (err) {
+          console.log('insert failed', err)
+        }
+        done()
+      })
     })
 
     afterEach(function (done) {

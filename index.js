@@ -853,7 +853,6 @@ module.exports = {
           self.log.info(create)
           self._query(create, function (err, result) {
             if (err) {
-              console.log('create table error line 857:', err)
               callback('Failed to create table ' + name + ' error:' + err)
               return
             }

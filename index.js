@@ -10,6 +10,13 @@ module.exports = {
   timerTable: 'kooptimers',
   limit: 2000,
 
+  /**
+   * Connect to the db with a connection string
+   *
+   * @param {String} conn - the connection string to the db with user/pass/host/dbname
+   * @param {Object} koop - an instance of koop, mainlt for central/shared logging 
+   * @param {Function} optional callback for when the db is ready
+   */
   connect: function (conn, koop, callback) {
     var self = this
     // use the koop logger
@@ -34,10 +41,16 @@ module.exports = {
     return this
   },
 
-  // returns the info doc for a key
-  getCount: function (key, options, callback) {
+  /**
+   * Gets the count of all features in a table
+   *
+   * @param {String} table - the table name
+   * @param {Object} options - optional params from the querystring like where and geometry 
+   * @param {Function} callback - returns the count
+   */
+  getCount: function (table, options, callback) {
     var self = this
-    var select = 'select count(*) as count from "' + key + '"'
+    var select = 'select count(*) as count from "' + table + '"'
     if (options.where) {
       if (options.where !== '1=1') {
         var clause = this.createWhereFromSql(options.where)
@@ -56,7 +69,7 @@ module.exports = {
 
     this._query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + key, null)
+        callback('Key Not Found ' + table, null)
       } else {
         self.log.debug('Get Count', result.rows[0].count, select)
         callback(null, parseInt(result.rows[0].count, 10))
@@ -64,11 +77,16 @@ module.exports = {
     })
   },
 
-  // returns the info doc for a key
-  getInfo: function (key, callback) {
-    this._query('select info from "' + this.infoTable + '" where id=\'' + key + ":info\'", function (err, result) {
+  /**
+   * Gets the info/metadata from the koopinfo table in the db
+   *
+   * @param {String} table - the table name
+   * @param {Function} callback - returns the info object
+   */
+  getInfo: function (table, callback) {
+    this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info\'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + key, null)
+        callback('Key Not Found ' + table, null)
       } else {
         var info = result.rows[0].info
         callback(null, info)
@@ -76,12 +94,19 @@ module.exports = {
     })
   },
 
+  /**
+   * Updates/overwrites the info/metadata for dataset in the db
+   *
+   * @param {String} table - the table name
+   * @param {Object} info - the metadata object to insert into the koopinfo table 
+   * @param {Function} callback - returns the info object
+   */
   // updates the info doc for a key
-  updateInfo: function (key, info, callback) {
-    this.log.debug('Updating info %s %s', key, info.status)
-    this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + key + ':info\'', function (err, result) {
+  updateInfo: function (table, info, callback) {
+    this.log.debug('Updating info %s %s', table, info.status)
+    this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + table + ':info\'', function (err, result) {
       if (err || !result) {
-        callback('Key Not Found ' + key, null)
+        callback('Key Not Found ' + table, null)
       } else {
         callback(null, true)
       }
@@ -424,7 +449,7 @@ module.exports = {
 
     self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
       if (err) {
-        console.log('So its failing here right?', table, self._buildSchemaFromFeature(feature))
+        console.log('So its failing here right?', table, self._buildSchemaFromFeature(feature), err)
         callback(err, false)
         return
       }
@@ -822,7 +847,7 @@ module.exports = {
     var sql = 'select exists(select * from information_schema.tables where table_name=\'' + name + '\')'
     this._query(sql, function (err, result) {
       if (err) {
-        callback('Failed to create table ' + name, sql)
+        callback('Failed to create table ' + name, sql, err)
       } else {
         if (result && !result.rows[0].exists) {
           var create = 'CREATE TABLE "' + name + '" ' + schema

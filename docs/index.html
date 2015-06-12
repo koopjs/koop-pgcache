@@ -13,9 +13,29 @@
           <a href="/" class="h5 button block button-transparent"> </a>
           <div class='px2'>
               <a
+                href='#buildschemafromfeature'
+                class='regular block'>
+                <code>_buildSchemaFromFeature</code>
+              </a>
+              <a
+                href='#createindex'
+                class='regular block'>
+                <code>_createIndex</code>
+              </a>
+              <a
+                href='#createtable'
+                class='regular block'>
+                <code>_createTable</code>
+              </a>
+              <a
                 href='#insertfeature'
                 class='regular block'>
                 <code>_insertFeature</code>
+              </a>
+              <a
+                href='#query'
+                class='regular block'>
+                <code>_query</code>
               </a>
               <a
                 href='#applycodeddomains'
@@ -61,11 +81,6 @@
                 href='#droptable'
                 class='regular block'>
                 <code>dropTable</code>
-              </a>
-              <a
-                href='#exports'
-                class='regular block'>
-                <code>exports</code>
               </a>
               <a
                 href='#geohashagg'
@@ -153,9 +168,152 @@
       <div class='sm-col  col-9  flex flex-column'>
         <div class='flex-auto full-width'>
           <div class='px1'>
+<section id='buildschemafromfeature'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L1057-L1069'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#buildschemafromfeature'>
+      <code>
+        _buildSchemaFromFeature<span class='gray'>(feature)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Builds a table schema from a geojson feature
+each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>feature</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>a geojson feature   * @returns {string} schema</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createindex'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L988-L997'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createindex'>
+      <code>
+        _createIndex<span class='gray'>(table, name, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates an index on a given table   *</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to index</p>
+</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of the index    * @param {string} using - the actual field and type of the index</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createtable'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L1007-L1048'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createtable'>
+      <code>
+        _createTable<span class='gray'>(name, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a new table
+checks to see if the table exists, create it if not</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>name</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of the index    * @param {string} schema - the schema to use for the table   * @param {Array} indexes - an array of indexes to place on the table</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
 <section id='insertfeature'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L566-L576'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L565-L575'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#insertfeature'>
@@ -208,9 +366,57 @@
 
 
 </section>
+<section id='query'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L966-L979'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#query'>
+      <code>
+        _query<span class='gray'>(sql, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Executes SQL again the DB
+uses connection pooling to connect and query</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>sql</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the sql to run</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when db returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
 <section id='applycodeddomains'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L126-L137'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L124-L135'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#applycodeddomains'>
@@ -266,7 +472,7 @@ if we find a match, replace value with the coded val</p>
 </section>
 <section id='connect'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L22-L44'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L20-L42'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#connect'>
@@ -321,7 +527,7 @@ if we find a match, replace value with the coded val</p>
 </section>
 <section id='countdistinctgeohash'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L858-L875'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L857-L874'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#countdistinctgeohash'>
@@ -376,7 +582,7 @@ if we find a match, replace value with the coded val</p>
 </section>
 <section id='createfilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L223-L232'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L221-L230'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#createfilterfromsql'>
@@ -423,7 +629,7 @@ if we find a match, replace value with the coded val</p>
 </section>
 <section id='creategeohash'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L586-L595'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L585-L594'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#creategeohash'>
@@ -478,7 +684,7 @@ computes the centroid of lines and polygons</p>
 </section>
 <section id='createlikefilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L199-L215'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L197-L213'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#createlikefilterfromsql'>
@@ -525,7 +731,7 @@ computes the centroid of lines and polygons</p>
 </section>
 <section id='createrangefilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L145-L192'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L143-L190'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#createrangefilterfromsql'>
@@ -572,7 +778,7 @@ computes the centroid of lines and polygons</p>
 </section>
 <section id='createwherefromsql'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L241-L270'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L239-L268'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#createwherefromsql'>
@@ -626,7 +832,7 @@ computes the centroid of lines and polygons</p>
 </section>
 <section id='droptable'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L627-L629'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L626-L628'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#droptable'>
@@ -671,30 +877,9 @@ computes the centroid of lines and polygons</p>
 
 
 </section>
-<section id='exports'class='mt2 mb2 py1 px2 keyline-top'>
-    <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L9-L1073'><code>index.js</code></a>
-    </div>
-  <h3 class='regular'>
-    <a class='black' href='#exports'>
-      <code>
-        exports<span class='gray'></span>
-      </code>
-    </a>
-  </h3>
-  
-
-
-
-
-
-
-
-
-</section>
 <section id='geohashagg'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L774-L849'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L773-L848'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#geohashagg'>
@@ -766,7 +951,7 @@ this will auto-reduce the precision of the geohashes if the given   * precision 
 </section>
 <section id='getcount'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L53-L80'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L51-L78'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#getcount'>
@@ -821,7 +1006,7 @@ this will auto-reduce the precision of the geohashes if the given   * precision 
 </section>
 <section id='getinfo'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L88-L97'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L86-L95'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#getinfo'>
@@ -868,7 +1053,7 @@ this will auto-reduce the precision of the geohashes if the given   * precision 
 </section>
 <section id='getstat'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L887-L953'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L886-L952'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#getstat'>
@@ -948,7 +1133,7 @@ Supports where and geometry filters and group by</p>
 </section>
 <section id='insert'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L438-L526'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L436-L524'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#insert'>
@@ -1012,7 +1197,7 @@ creates indexes for each property in the features and substring indexes on geoha
 </section>
 <section id='insertpartial'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L537-L557'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L535-L555'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#insertpartial'>
@@ -1076,7 +1261,7 @@ used as a way to insert pages of features, and only features, not metadata</p>
 </section>
 <section id='parsegeometry'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L387-L427'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L385-L425'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#parsegeometry'>
@@ -1115,7 +1300,7 @@ used as a way to insert pages of features, and only features, not metadata</p>
 </section>
 <section id='remove'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L603-L619'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L602-L618'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#remove'>
@@ -1163,7 +1348,7 @@ will delete all metadata, timers, and features   *</p>
 </section>
 <section id='select'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L279-L380'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L277-L378'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#select'>
@@ -1218,7 +1403,7 @@ will delete all metadata, timers, and features   *</p>
 </section>
 <section id='servicecount'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L664-L673'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L663-L672'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#servicecount'>
@@ -1265,7 +1450,7 @@ will delete all metadata, timers, and features   *</p>
 </section>
 <section id='serviceget'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L697-L716'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L696-L715'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#serviceget'>
@@ -1321,7 +1506,7 @@ if no id is sent it returns an array of every service for that type</p>
 </section>
 <section id='serviceregister'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L638-L656'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L637-L655'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#serviceregister'>
@@ -1376,7 +1561,7 @@ if no id is sent it returns an array of every service for that type</p>
 </section>
 <section id='serviceremove'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L682-L687'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L681-L686'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#serviceremove'>
@@ -1431,7 +1616,7 @@ if no id is sent it returns an array of every service for that type</p>
 </section>
 <section id='timerget'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L746-L758'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L745-L757'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#timerget'>
@@ -1479,7 +1664,7 @@ timers are used throttle API calls by preventing providers from   * over-calling
 </section>
 <section id='timerset'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L724-L737'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L723-L736'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#timerset'>
@@ -1526,7 +1711,7 @@ timers are used throttle API calls by preventing providers from   * over-calling
 </section>
 <section id='updateinfo'class='mt2 mb2 py1 px2 keyline-top'>
     <div class='right py2'>
-      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/057306c52275c4b1085cd2c7e3a31533f168f435/index.js#L107-L116'><code>index.js</code></a>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L105-L114'><code>index.js</code></a>
     </div>
   <h3 class='regular'>
     <a class='black' href='#updateinfo'>

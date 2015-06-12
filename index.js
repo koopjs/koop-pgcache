@@ -560,6 +560,7 @@ module.exports = {
    * @param {string} table - the table to insert into
    * @param {Object} feature - a geojson feature
    * @param {string} i - index value to use an id
+   * @private
    */
   _insertFeature: function (table, feature, i) {
     var featurestring = JSON.stringify(feature).replace(/'/g, '')

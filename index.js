@@ -78,6 +78,44 @@ module.exports = {
   },
 
   /**
+   * Gets the extent of all features in a table
+   *
+   * @param {string} table - the table name
+   * @param {Object} options - optional params from the querystring like where and geometry
+   * @param {function} callback - returns the count
+   */
+  getExtent: function (table, options, callback) {
+    var self = this
+    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM " + table + '"'
+    if (options.where) {
+      if (options.where !== '1=1') {
+        var clause = this.createWhereFromSql(options.where)
+        select += ' WHERE ' + clause
+      } else {
+        select += ' WHERE ' + options.where
+      }
+    }
+
+    var box = this.parseGeometry(options.geometry)
+    if (box) {
+      select += (options.where) ? ' AND ' : ' WHERE '
+      var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
+      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+    }
+
+    this._query(select, function (err, result) {
+      if (err || !result || !result.rows || !result.rows.length) {
+        callback('Key Not Found ' + table, null)
+      } else {
+        var extent = result.rows[0].extent
+        var bbox = extent
+        self.log.debug('Get Extent', extent, select)
+        callback(null, bbox)
+      }
+    })
+  },
+
+  /**
    * Gets the info/metadata from the koopinfo table in the db
    *
    * @param {string} table - the table name

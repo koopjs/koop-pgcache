@@ -274,6 +274,14 @@ describe('pgCache Model Tests', function () {
       })
     })
 
+    it('should get feature extent', function (done) {
+      pgCache.getExtent(key + ':0', {}, function (err, extent) {
+        if (err) throw err
+        // extent.length.should.equal(4)
+        done()
+      })
+    })
+
   })
 
   describe('when parsing geometries', function () {

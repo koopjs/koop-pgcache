@@ -358,143 +358,133 @@ describe('pgCache Model Tests', function () {
     })
   })
 
-  describe('when getting stats w/o geometry or where filters or a group by', function () {
+  describe('when getting stats ', function () {
     var table = 'test:german:data5',
       data = require('./fixtures/germany.json'),
-      type = 'min',
-      field = 'ID',
-      outName = 'ID_MIN',
-      options = { name: 'german-data', geomType: 'Point', features: data.features }
-
-    it('should generate the correct min value', function (done) {
-      pgCache.remove(table + ':0', function () {
-        pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res[0][outName].should.equal(2914)
-            done()
-          })
-        })
-      })
-    })
-  })
-
-  describe('when getting a max stats w/o geometry or where filters', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      type = 'max',
-      field = 'ID',
-      outName = 'ID_MAX',
-      options = { name: 'german-data', geomType: 'Point', features: data.features }
-
-    it('should generate the correct min value', function (done) {
-      pgCache.remove(table + ':0', function () {
-        pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res[0][outName].should.equal(3606)
-            done()
-          })
-        })
-      })
-    })
-  })
-
-  describe('when getting stats w/group by', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      type = 'count',
-      field = 'Land',
-      outName = 'Land_COUNT',
-      options = { name: 'german-data', geomType: 'Point', features: data.features, groupby: 'Land' }
-
-    it('should generate the correct min value', function (done) {
-      pgCache.remove(table + ':0', function () {
-        pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res.length.should.equal(6)
-            done()
-          })
-        })
-      })
-    })
-  })
-
-  describe('when getting stats w/geometry filter', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      type = 'max',
-      field = 'ID',
-      outName = 'ID_Min',
-      options = {
-        name: 'german-data',
-        geomType: 'Point',
-        features: data.features,
-        geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532'
-      }
-
-    it('should generate the correct min value', function (done) {
-      pgCache.remove(table + ':0', function () {
-        pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res[0][outName].should.equal(3603)
-            done()
-          })
-        })
-      })
-    })
-  })
-
-  describe('when getting the average stat', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      type = 'avg',
-      field = 'ID',
-      outName = 'ID_AVG',
       options = {
         name: 'german-data',
         geomType: 'Point',
         features: data.features
       }
 
-    it('should generate the correct average', function (done) {
+    beforeEach(function (done) {
       pgCache.remove(table + ':0', function () {
         pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res[0][outName].should.equal(3427)
-            done()
-          })
+          done()
         })
       })
     })
-  })
 
-  describe('when getting stats w/a group by array', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      type = 'count',
-      field = 'Land',
-      outName = 'Land_COUNT',
-      options = {
-        name: 'german-data',
-        geomType: 'Point',
-        features: data.features,
-        groupby: ['Land', 'Art']
-      }
-
-    it('should generate the correct min value', function (done) {
+    afterEach(function (done) {
       pgCache.remove(table + ':0', function () {
-        pgCache.insert(table, options, 0, function () {
-          pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
-            should.not.exist(err)
-            res.length.should.equal(23)
-            done()
-          })
-        })
+        done()
       })
     })
+
+    var field = 'ID',
+      outName = 'stat'
+
+    it('should generate a min value', function (done) {
+      var type = 'min',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(2914)
+        done()
+      })
+    })
+
+    it('should generate a max value', function (done) {
+      var type = 'max',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(3606)
+        done()
+      })
+    })
+
+    it('should generate a avg value', function (done) {
+      var type = 'avg',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(3427)
+        done()
+      })
+    })
+
+    it('should generate a var value', function (done) {
+      var type = 'var',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(16793)
+        done()
+      })
+    })
+
+    it('should generate a stddev value', function (done) {
+      var type = 'stddev',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(130)
+        done()
+      })
+    })
+
+    it('should generate a count value', function (done) {
+      var type = 'count',
+        options = {}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(249)
+        done()
+      })
+    })
+
+    it('should generate grouped count values with a groupby option', function (done) {
+      var type = 'count',
+        options = {groupby: 'Land'}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res.length.should.equal(6)
+        done()
+      })
+    })
+
+    it('should generate grouped count values with multiple groupby options', function (done) {
+      var type = 'count',
+        options = {groupby: ['Land', 'Art']}
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res.length.should.equal(23)
+        done()
+      })
+    })
+
+    it('should generate stats with a geometry filters', function (done) {
+      var type = 'count',
+        options = {
+          geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532'
+        }
+
+      pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
+        should.not.exist(err)
+        res[0][outName].should.equal(26)
+        done()
+      })
+    })
+
   })
+
 })

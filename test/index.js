@@ -1,21 +1,18 @@
 /*global before, describe, beforeEach, it, afterEach */
 var should = require('should'),
-Logger = require('./logger'),
-key,
-repoData,
-snowData,
-pgCache
+  fs = require('fs'),
+  Logger = require('./logger'),
+  key,
+  repoData,
+  snowData,
+  pgCache
 
 before(function (done) {
   key = 'test:repo:file'
   repoData = require('./fixtures/data.geojson')
   snowData = require('./fixtures/snow.geojson')
   pgCache = require('../')
-  var config = {
-    'db': {
-      'conn': 'postgres://localhost/koopdev'
-    }
-  }
+  var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
 
   pgCache.connect(config.db.conn, {}, function () {
     done()

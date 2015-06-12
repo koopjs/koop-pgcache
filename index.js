@@ -14,7 +14,7 @@ module.exports = {
    * Connect to the db with a connection string
    *
    * @param {String} conn - the connection string to the db with user/pass/host/dbname
-   * @param {Object} koop - an instance of koop, mainlt for central/shared logging 
+   * @param {Object} koop - an instance of koop, mainlt for central/shared logging
    * @param {Function} optional callback for when the db is ready
    */
   connect: function (conn, koop, callback) {
@@ -45,7 +45,7 @@ module.exports = {
    * Gets the count of all features in a table
    *
    * @param {String} table - the table name
-   * @param {Object} options - optional params from the querystring like where and geometry 
+   * @param {Object} options - optional params from the querystring like where and geometry
    * @param {Function} callback - returns the count
    */
   getCount: function (table, options, callback) {
@@ -98,7 +98,7 @@ module.exports = {
    * Updates/overwrites the info/metadata for dataset in the db
    *
    * @param {String} table - the table name
-   * @param {Object} info - the metadata object to insert into the koopinfo table 
+   * @param {Object} info - the metadata object to insert into the koopinfo table
    * @param {Function} callback - returns the info object
    */
   // updates the info doc for a key

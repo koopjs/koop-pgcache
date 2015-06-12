@@ -847,7 +847,6 @@ module.exports = {
     var sql = 'select exists(select * from information_schema.tables where table_name=\'' + name + '\')'
     this._query(sql, function (err, result) {
       if (err) {
-        console.log('create table error line 850:', err)
         callback('Failed to create table ' + name)
       } else {
         if (result && !result.rows[0].exists) {
@@ -855,7 +854,8 @@ module.exports = {
           self.log.info(create)
           self._query(create, function (err, result) {
             if (err) {
-              callback('Failed to create table ' + name)
+              console.log('create table error line 857:', err)
+              callback('Failed to create table ' + name + ' error:' + err)
               return
             }
 

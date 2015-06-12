@@ -25,6 +25,21 @@ before(function (done) {
 })
 
 describe('pgCache Model Tests', function () {
+
+  describe('when creating DB tables', function () {
+    it('create a table w/o erroring', function (done) {
+      var name = 'testtable',
+        schema = '(id varchar(100), host varchar(100))',
+        indexes = []
+
+      pgCache._createTable(name, schema, indexes, function (err) {
+        console.log(err)
+        should.not.exist(err)
+        done()
+      })
+    })
+  })
+
   describe('when caching a github file', function () {
 
     beforeEach(function (done) {

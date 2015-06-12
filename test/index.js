@@ -71,29 +71,40 @@ describe('pgCache Model Tests', function () {
       pgCache.updateInfo(key + ':0', {test: true}, function (err, data) {
         should.not.exist(err)
         pgCache.getInfo(key + ':0', function (err, data) {
-          if (err) throw err
+          should.not.exist(err)
           data.test.should.equal(true)
           done()
         })
       })
     })
 
-    it('should insert, data', function (done) {
+    it('should insert data', function (done) {
       var snowKey = 'test:snow:data'
       pgCache.insert(snowKey, snowData, 0, function (error, success) {
         should.not.exist(error)
         success.should.equal(true)
+
         pgCache.getInfo(snowKey + ':0', function (err, info) {
           should.not.exist(err)
           info.name.should.equal('snow.geojson')
+
           pgCache.remove(snowKey + ':0', function (err, result) {
             should.not.exist(err)
+
             pgCache.getInfo(snowKey + ':0', function (err, info) {
               should.exist(err)
               done()
             })
           })
         })
+      })
+    })
+
+    it('should insert data to an existing table', function (done) {
+      pgCache.insertPartial(key, snowData, 0, function (err, success) {
+        should.not.exist(err)
+        success.should.equal(true)
+        done()
       })
     })
 

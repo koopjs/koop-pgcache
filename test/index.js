@@ -15,7 +15,6 @@ before(function (done) {
   var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
 
   pgCache.connect(config.db.conn, {}, function () {
-    // console.log('Could not connect to the db', err)
     done()
   })
 
@@ -33,14 +32,13 @@ describe('pgCache Model Tests', function () {
         indexes = []
 
       pgCache._createTable(name, schema, indexes, function (err) {
-        console.log(err)
         should.not.exist(err)
         done()
       })
     })
   })
 
-  describe('when caching a github file', function () {
+  describe('when caching geojson', function () {
 
     beforeEach(function (done) {
       pgCache.insert(key, repoData[0], 0, function (err) {

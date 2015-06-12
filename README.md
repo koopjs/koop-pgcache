@@ -43,6 +43,10 @@ koop.registerCache(koopPg)
 
 If everything was configured correctly, Koop should now be using your PostGIS database to cache data from providers.
 
+## Documentation 
+
+* [koop-pgcache docs](http://koopjs.github.io/koop-pgcache/docs)
+
 ## Resources
 
 * [Koop](https://github.com/Esri/koop)

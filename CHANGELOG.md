@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased](https://github.com/Esri/koop-pgcache/compare/v0.2.0...HEAD)
+### Added
+* Continuous integration support via https://travis-ci.org
+* Function-level documentation and doc generation via http://documentation.js.org
+
 ## [0.2.0] - 2015-06-11
 ### Added
 * getStat supports getting a statistic from the db directly

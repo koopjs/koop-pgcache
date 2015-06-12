@@ -449,7 +449,6 @@ module.exports = {
 
     self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
       if (err) {
-        console.log('So its failing here right?', table, self._buildSchemaFromFeature(feature), err)
         callback(err, false)
         return
       }

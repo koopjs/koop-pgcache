@@ -16,4 +16,4 @@ addons:
 
 before_script:
   - psql -c 'create database koopdev;' -U postgres
-  - psql -U postgres -c "create extension postgis"
+  - psql -c 'create extension postgis;' -U postgres

@@ -13,9 +13,9 @@ module.exports = {
   /**
    * Connect to the db with a connection string
    *
-   * @param {String} conn - the connection string to the db with user/pass/host/dbname
+   * @param {string} conn - the connection string to the db with user/pass/host/dbname
    * @param {Object} koop - an instance of koop, mainlt for central/shared logging
-   * @param {Function} optional callback for when the db is ready
+   * @param {function} optional callback for when the db is ready
    */
   connect: function (conn, koop, callback) {
     var self = this
@@ -44,9 +44,9 @@ module.exports = {
   /**
    * Gets the count of all features in a table
    *
-   * @param {String} table - the table name
+   * @param {string} table - the table name
    * @param {Object} options - optional params from the querystring like where and geometry
-   * @param {Function} callback - returns the count
+   * @param {function} callback - returns the count
    */
   getCount: function (table, options, callback) {
     var self = this
@@ -80,8 +80,8 @@ module.exports = {
   /**
    * Gets the info/metadata from the koopinfo table in the db
    *
-   * @param {String} table - the table name
-   * @param {Function} callback - returns the info object
+   * @param {string} table - the table name
+   * @param {function} callback - returns the info Object
    */
   getInfo: function (table, callback) {
     this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info\'", function (err, result) {
@@ -97,9 +97,9 @@ module.exports = {
   /**
    * Updates/overwrites the info/metadata for dataset in the db
    *
-   * @param {String} table - the table name
-   * @param {Object} info - the metadata object to insert into the koopinfo table
-   * @param {Function} callback - returns the info object
+   * @param {string} table - the table name
+   * @param {Object} info - the metadata Object to insert into the koopinfo table
+   * @param {function} callback - returns the info Object
    */
   // updates the info doc for a key
   updateInfo: function (table, info, callback) {
@@ -117,8 +117,8 @@ module.exports = {
    * Check for any coded values in the fields
    * if we find a match, replace value with the coded val
    *
-   * @param {String} fieldName - the name of field to look for
-   * @param {Number} value - the coded value
+   * @param {string} fieldName - the name of field to look for
+   * @param {number} value - the coded value
    * @param {Array} fields - a list of fields to use for coded value replacements
    */
   applyCodedDomains: function (fieldName, value, fields) {
@@ -137,7 +137,7 @@ module.exports = {
   /**
    * Creates a "range" filter for querying numeric values
    *
-   * @param {String} sql - a sql where clause
+   * @param {string} sql - a sql where clause
    * @param {Array} fields - a list of fields in to support coded value domains
    */
   createRangeFilterFromSql: function (sql, fields) {
@@ -191,7 +191,7 @@ module.exports = {
    /**
    * Create a "like" filter for query string values
    *
-   * @param {String} sql - a sql where clause
+   * @param {string} sql - a sql where clause
    * @param {Array} fields - a list of fields in to support coded value domains
    */
   createLikeFilterFromSql: function (sql, fields) {
@@ -215,7 +215,7 @@ module.exports = {
   /**
    * Determines if a range or like filter is needed   * appends directly to the sql passed in
    *
-   * @param {String} sql - a sql where clause
+   * @param {string} sql - a sql where clause
    * @param {Array} fields - a list of fields in to support coded value domains
    */
   createFilterFromSql: function (sql, fields) {
@@ -232,9 +232,9 @@ module.exports = {
   /**
    * Creates a viable SQL where clause from a passed in SQL (from a url "where" param)
    *
-   * @param {String} where - a sql where clause
+   * @param {string} where - a sql where clause
    * @param {Array} fields - a list of fields in to support coded value domains
-   * @returns {String} sql
+   * @returns {string} sql
    */
   createWhereFromSql: function (where, fields) {
     var self = this
@@ -270,9 +270,9 @@ module.exports = {
   /**
    * Get features out of the db
    *
-   * @param {String} id - the dataset id to insert into
+   * @param {string} id - the dataset id to insert into
    * @param {Object} options - optional params used for filtering features (where, geometry, etc)
-   * @param {Function} callback - the callback when the query returns
+   * @param {function} callback - the callback when the query returns
    */
   select: function (id, options, callback) {
     var self = this
@@ -378,9 +378,9 @@ module.exports = {
   },
 
   /**
-   * Parses a geometry object
+   * Parses a geometry Object
    *
-   * @param {String} geometry - a geometry used for filtering data spatially
+   * @param {string} geometry - a geometry used for filtering data spatially
    */
   parseGeometry: function (geometry) {
     var geom = geometry
@@ -406,7 +406,7 @@ module.exports = {
         }
       }
     } else if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
-      // is this a valid geometry object that has a spatial ref different than 4326?
+      // is this a valid geometry Object that has a spatial ref different than 4326?
       var mins = merc.inverse([geom.xmin, geom.ymin]),
         maxs = merc.inverse([geom.xmax, geom.ymax])
       bbox = { spatialReference: {wkid: 4326} }
@@ -428,10 +428,10 @@ module.exports = {
    * Creates a table and inserts features and metadat
    * creates indexes for each property in the features and substring indexes on geohashes
    *
-   * @param {String} id - the dataset id to insert into
+   * @param {string} id - the dataset id to insert into
    * @param {Object} geojson - geojson features
-   * @param {Number} layerId - the layer id for this dataset
-   * @param {Function} callback - the callback when the query returns
+   * @param {number} layerId - the layer id for this dataset
+   * @param {function} callback - the callback when the query returns
    */
   insert: function (id, geojson, layerId, callback) {
     var self = this
@@ -451,7 +451,7 @@ module.exports = {
     var feature = (geojson.length) ? geojson[0].features[0] : geojson.features[0]
 
     var types = {
-      'esriGeometryPolyline': 'LineString',
+      'esriGeometryPolyline': 'Linestring',
       'esriGeometryPoint': 'Point',
       'esriGeometryPolygon': 'Polygon'
     }
@@ -527,10 +527,10 @@ module.exports = {
    * Inserts an array of features
    * used as a way to insert pages of features, and only features, not metadata
    *
-   * @param {String} id - the dataset id to insert into
+   * @param {string} id - the dataset id to insert into
    * @param {Object} geojson - geojson features
-   * @param {Number} layerId - the layer id for this dataset
-   * @param {Function} callback - the callback when the query returns
+   * @param {number} layerId - the layer id for this dataset
+   * @param {function} callback - the callback when the query returns
    */
   insertPartial: function (id, geojson, layerId, callback) {
     var self = this
@@ -557,19 +557,19 @@ module.exports = {
   /**
    * Creates the sql needed to insert the feature
    *
-   * @param {String} table - the table to insert into
+   * @param {string} table - the table to insert into
    * @param {Object} feature - a geojson feature
-   * @param {String} i - index value to use an id
+   * @param {string} i - index value to use an id
    */
   _insertFeature: function (table, feature, i) {
-    var featureString = JSON.stringify(feature).replace(/'/g, '')
+    var featurestring = JSON.stringify(feature).replace(/'/g, '')
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
       var geohash = this.createGeohash(feature, this.geohashPrecision)
       feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
-      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featureString + '\', \'' + geohash + '\')'
+      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\')'
     } else {
-      return 'insert into "' + table + '" (feature) VALUES (\'' + featureString + '\')'
+      return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\')'
     }
   },
 
@@ -578,8 +578,8 @@ module.exports = {
    * computes the centroid of lines and polygons
    *
    * @param {Object} feature - a geojson feature
-   * @param {Number} precision - the precision at which the geohash will be created
-   * @returns {String} geohash
+   * @param {number} precision - the precision at which the geohash will be created
+   * @returns {string} geohash
    */
   createGeohash: function (feature, precision) {
     if (!feature.geometry || !feature.geometry.coordinates) {
@@ -595,8 +595,8 @@ module.exports = {
   /**
    * Removes everything in the DB for a given idea
    * will delete all metadata, timers, and features   *
-   * @param {String} id - the dataset id to remove
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} id - the dataset id to remove
+   * @param {function} callback - the callback when the query returns
    */
   remove: function (id, callback) {
     var self = this
@@ -619,8 +619,8 @@ module.exports = {
   /**
    * Drops a table from the DB
    *
-   * @param {String} table - the table to drop
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} table - the table to drop
+   * @param {function} callback - the callback when the query returns
    */
   dropTable: function (table, callback) {
     this._query('drop table "' + table + '"', callback)
@@ -629,9 +629,9 @@ module.exports = {
   /**
    * Register a new service in the DB with the given type and info
    *
-   * @param {String} type - the type of service: agol, socrata, ckan, etc.
-   * @param {Object} info - object containing a host and id for this service
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} type - the type of service: agol, socrata, ckan, etc.
+   * @param {Object} info - Object containing a host and id for this service
+   * @param {function} callback - the callback when the query returns
    */
   serviceRegister: function (type, info, callback) {
     var self = this
@@ -656,8 +656,8 @@ module.exports = {
   /**
    * Gets the count of the number of services registered for a given type
    *
-   * @param {String} type - the type of service: agol, socrata, ckan, etc.
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} type - the type of service: agol, socrata, ckan, etc.
+   * @param {function} callback - the callback when the query returns
    */
   serviceCount: function (type, callback) {
     var sql = 'select count(*) as count from "' + type + '"'
@@ -673,9 +673,9 @@ module.exports = {
   /**
    * Removes a service for a given type and id from the DB
    *
-   * @param {String} type - the type of service: agol, socrata, ckan, etc.
-   * @param {String} id - the id to use for the service
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} type - the type of service: agol, socrata, ckan, etc.
+   * @param {string} id - the id to use for the service
+   * @param {function} callback - the callback when the query returns
    */
   serviceRemove: function (type, id, callback) {
     var sql = 'delete from "' + type + '" where id=\'' + id + "'"
@@ -688,9 +688,9 @@ module.exports = {
    * Gets a service for a given type and id
    * if no id is sent it returns an array of every service for that type
    *
-   * @param {String} type - the type of service: agol, socrata, ckan, etc.
-   * @param {String} id - the id to use for the service
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} type - the type of service: agol, socrata, ckan, etc.
+   * @param {string} id - the id to use for the service
+   * @param {function} callback - the callback when the query returns
    */
   serviceGet: function (type, id, callback) {
     var self = this
@@ -716,8 +716,8 @@ module.exports = {
   /**
    * Sets new timer for a given table
    *
-   * @param {String} table - the table to query
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} table - the table to query
+   * @param {function} callback - the callback when the query returns
    */
   timerSet: function (key, expires, callback) {
     var self = this
@@ -738,8 +738,8 @@ module.exports = {
    * Gets the current timer for a given table
    * timers are used throttle API calls by preventing providers from   * over-calling an API.
    *
-   * @param {String} table - the table to query
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} table - the table to query
+   * @param {function} callback - the callback when the query returns
    */
   timerGet: function (table, callback) {
     this._query('select * from "' + this.timerTable + '" where id=\'' + table + '\'', function (err, res) {
@@ -763,11 +763,11 @@ module.exports = {
    * Get a geohash aggregation for a set of features in the db
    * this will auto-reduce the precision of the geohashes if the given   * precision exceeds the given limit.
    *
-   * @param {String} table - the table to query
-   * @param {Number} limit - the max number of geohash to send back
-   * @param {String} precision - the precision at which to extract geohashes
+   * @param {string} table - the table to query
+   * @param {number} limit - the max number of geohash to send back
+   * @param {string} precision - the precision at which to extract geohashes
    * @param {Object} options - optional params like where and geometry
-   * @param {Function} callback - the callback when the query returns
+   * @param {function} callback - the callback when the query returns
    */
   geoHashAgg: function (table, limit, precision, options, callback) {
     var self = this
@@ -849,9 +849,9 @@ module.exports = {
   /**
    * Get the count of distinct geohashes for a query
    *
-   * @param {String} table - the table to query
-   * @param {String} precision - the precision at which to extract the distinct geohash counts    * @param {Object} options - optional params like where and geometry
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} table - the table to query
+   * @param {string} precision - the precision at which to extract the distinct geohash counts    * @param {Object} options - optional params like where and geometry
+   * @param {function} callback - the callback when the query returns
    */
   countDistinctGeoHash: function (table, precision, options, callback) {
     var countSql = 'select count(DISTINCT(substring(geohash,0,' + precision + '))) as count from "' + table + '"'
@@ -875,12 +875,12 @@ module.exports = {
   /**
    * Gets a statistic on one field at a time
    * Supports where and geometry filters and group by
-   * @param {String} table to get data from
-   * @param {String} field to generate stats from
-   * @param {String} outName the name of the stat field
-   * @param {String} type - the stat type: min, max, avg, count, var, stddev
+   * @param {string} table to get data from
+   * @param {string} field to generate stats from
+   * @param {string} outName the name of the stat field
+   * @param {string} type - the stat type: min, max, avg, count, var, stddev
    * @param {Object} options - optional params for the query: where, geometry, groupBy
-   * @param {Function} callback - when the query is done
+   * @param {function} callback - when the query is done
    */
   getStat: function (table, field, outName, type, options, callback) {
     // force var to be variance in SQL
@@ -958,8 +958,8 @@ module.exports = {
    * Executes SQL again the DB
    * uses connection pooling to connect and query
    *
-   * @param {String} sql - the sql to run
-   * @param {Function} callback - the callback when db returns
+   * @param {string} sql - the sql to run
+   * @param {function} callback - the callback when db returns
    * @private
    */
   _query: function (sql, callback) {
@@ -979,9 +979,9 @@ module.exports = {
 
   /**
    * Creates an index on a given table   *
-   * @param {String} table - the table to index
-   * @param {String} name - the name of the index    * @param {String} using - the actual field and type of the index
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} table - the table to index
+   * @param {string} name - the name of the index    * @param {string} using - the actual field and type of the index
+   * @param {function} callback - the callback when the query returns
    * @private
    */
   _createIndex: function (table, name, using, callback) {
@@ -999,8 +999,8 @@ module.exports = {
    * Creates a new table
    * checks to see if the table exists, create it if not
    *
-   * @param {String} name - the name of the index    * @param {String} schema - the schema to use for the table   * @param {Array} indexes - an array of indexes to place on the table
-   * @param {Function} callback - the callback when the query returns
+   * @param {string} name - the name of the index    * @param {string} schema - the schema to use for the table   * @param {Array} indexes - an array of indexes to place on the table
+   * @param {function} callback - the callback when the query returns
    * @private
    */
   _createTable: function (name, schema, indexes, callback) {
@@ -1050,7 +1050,7 @@ module.exports = {
    * Builds a table schema from a geojson feature
    * each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here
    *
-   * @param {Object} feature - a geojson feature   * @returns {String} schema
+   * @param {Object} feature - a geojson feature   * @returns {string} schema
    * @private
    */
   _buildSchemaFromFeature: function (feature) {

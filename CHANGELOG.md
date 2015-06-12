@@ -2,7 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased](https://github.com/Esri/koop-pgcache/compare/v0.2.0...HEAD)
+## [0.2.1] - 2015-06-12
+### Fixed
+* Broken sql due to missing semicolons
+
 ### Added
 * Continuous integration support via https://travis-ci.org
 * Function-level documentation and doc generation via http://documentation.js.org

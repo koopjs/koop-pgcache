@@ -534,17 +534,17 @@ module.exports = {
    */
   insertPartial: function (id, geojson, layerId, callback) {
     var self = this
-    var sql = 'BEGIN'
+    var sql = 'BEGIN;'
     var table = id + ':' + layerId
 
     geojson.features.forEach(function (feature, i) {
       sql += self._insertFeature(table, feature, i)
     })
-    sql += 'COMMIT'
+    sql += 'COMMIT;'
     this._query(sql, function (err, res) {
       if (err) {
         self.log.error('insert partial ERROR %s, %s', err, id)
-        self._query('ROLLBACK', function () {
+        self._query('ROLLBACK;', function () {
           callback(err, false)
         })
       } else {
@@ -568,9 +568,9 @@ module.exports = {
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
       var geohash = this.createGeohash(feature, this.geohashPrecision)
       feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
-      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\')'
+      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
     } else {
-      return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\')'
+      return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\');'
     }
   },
 

@@ -1,0 +1,1774 @@
+<html>
+<head>
+  <title> </title>
+  <link href='assets/bass.css' type='text/css' rel='stylesheet' />
+  <link href='assets/style.css' type='text/css' rel='stylesheet' />
+  <link href='assets/github.css' type='text/css' rel='stylesheet' />
+</head>
+<body class='documentation'>
+  <div class='px2'>
+    <div class='clearfix flex flex-stretch mxn2'>
+      <div class='documentation-sidebar relative top-0 bottom-0 right-0 px2 py2 col-3 sm-show'>
+        <div class='font-smaller fixed col-3 top-0 bottom-0 left-0 overflow-auto black bg-cloudy'>
+          <a href="/" class="h5 button block button-transparent"> </a>
+          <div class='px2'>
+              <a
+                href='#buildschemafromfeature'
+                class='regular block'>
+                <code>_buildSchemaFromFeature</code>
+              </a>
+              <a
+                href='#createindex'
+                class='regular block'>
+                <code>_createIndex</code>
+              </a>
+              <a
+                href='#createtable'
+                class='regular block'>
+                <code>_createTable</code>
+              </a>
+              <a
+                href='#insertfeature'
+                class='regular block'>
+                <code>_insertFeature</code>
+              </a>
+              <a
+                href='#query'
+                class='regular block'>
+                <code>_query</code>
+              </a>
+              <a
+                href='#applycodeddomains'
+                class='regular block'>
+                <code>applyCodedDomains</code>
+              </a>
+              <a
+                href='#connect'
+                class='regular block'>
+                <code>connect</code>
+              </a>
+              <a
+                href='#countdistinctgeohash'
+                class='regular block'>
+                <code>countDistinctGeoHash</code>
+              </a>
+              <a
+                href='#createfilterfromsql'
+                class='regular block'>
+                <code>createFilterFromSql</code>
+              </a>
+              <a
+                href='#creategeohash'
+                class='regular block'>
+                <code>createGeohash</code>
+              </a>
+              <a
+                href='#createlikefilterfromsql'
+                class='regular block'>
+                <code>createLikeFilterFromSql</code>
+              </a>
+              <a
+                href='#createrangefilterfromsql'
+                class='regular block'>
+                <code>createRangeFilterFromSql</code>
+              </a>
+              <a
+                href='#createwherefromsql'
+                class='regular block'>
+                <code>createWhereFromSql</code>
+              </a>
+              <a
+                href='#droptable'
+                class='regular block'>
+                <code>dropTable</code>
+              </a>
+              <a
+                href='#geohashagg'
+                class='regular block'>
+                <code>geoHashAgg</code>
+              </a>
+              <a
+                href='#getcount'
+                class='regular block'>
+                <code>getCount</code>
+              </a>
+              <a
+                href='#getinfo'
+                class='regular block'>
+                <code>getInfo</code>
+              </a>
+              <a
+                href='#getstat'
+                class='regular block'>
+                <code>getStat</code>
+              </a>
+              <a
+                href='#insert'
+                class='regular block'>
+                <code>insert</code>
+              </a>
+              <a
+                href='#insertpartial'
+                class='regular block'>
+                <code>insertPartial</code>
+              </a>
+              <a
+                href='#parsegeometry'
+                class='regular block'>
+                <code>parseGeometry</code>
+              </a>
+              <a
+                href='#remove'
+                class='regular block'>
+                <code>remove</code>
+              </a>
+              <a
+                href='#select'
+                class='regular block'>
+                <code>select</code>
+              </a>
+              <a
+                href='#servicecount'
+                class='regular block'>
+                <code>serviceCount</code>
+              </a>
+              <a
+                href='#serviceget'
+                class='regular block'>
+                <code>serviceGet</code>
+              </a>
+              <a
+                href='#serviceregister'
+                class='regular block'>
+                <code>serviceRegister</code>
+              </a>
+              <a
+                href='#serviceremove'
+                class='regular block'>
+                <code>serviceRemove</code>
+              </a>
+              <a
+                href='#timerget'
+                class='regular block'>
+                <code>timerGet</code>
+              </a>
+              <a
+                href='#timerset'
+                class='regular block'>
+                <code>timerSet</code>
+              </a>
+              <a
+                href='#updateinfo'
+                class='regular block'>
+                <code>updateInfo</code>
+              </a>
+          </div>
+        </div>
+      </div>
+      <div class='sm-col  col-9  flex flex-column'>
+        <div class='flex-auto full-width'>
+          <div class='px1'>
+<section id='buildschemafromfeature'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L1057-L1069'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#buildschemafromfeature'>
+      <code>
+        _buildSchemaFromFeature<span class='gray'>(feature)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Builds a table schema from a geojson feature
+each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>feature</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>a geojson feature   * @returns {string} schema</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createindex'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L988-L997'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createindex'>
+      <code>
+        _createIndex<span class='gray'>(table, name, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates an index on a given table   *</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to index</p>
+</td>
+          </tr>
+          <tr>
+            <td>name</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of the index    * @param {string} using - the actual field and type of the index</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createtable'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L1007-L1048'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createtable'>
+      <code>
+        _createTable<span class='gray'>(name, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a new table
+checks to see if the table exists, create it if not</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>name</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of the index    * @param {string} schema - the schema to use for the table   * @param {Array} indexes - an array of indexes to place on the table</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='insertfeature'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L565-L575'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#insertfeature'>
+      <code>
+        _insertFeature<span class='gray'>(table, feature, i)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates the sql needed to insert the feature</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to insert into</p>
+</td>
+          </tr>
+          <tr>
+            <td>feature</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>a geojson feature</p>
+</td>
+          </tr>
+          <tr>
+            <td>i</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>index value to use an id</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='query'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L966-L979'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#query'>
+      <code>
+        _query<span class='gray'>(sql, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Executes SQL again the DB
+uses connection pooling to connect and query</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>sql</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the sql to run</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when db returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='applycodeddomains'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L124-L135'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#applycodeddomains'>
+      <code>
+        applyCodedDomains<span class='gray'>(fieldName, value, fields)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Check for any coded values in the fields
+if we find a match, replace value with the coded val</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>fieldName</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of field to look for</p>
+</td>
+          </tr>
+          <tr>
+            <td>value</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+            </td>
+            <td><p>the coded value</p>
+</td>
+          </tr>
+          <tr>
+            <td>fields</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></code>
+            </td>
+            <td><p>a list of fields to use for coded value replacements</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='connect'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L20-L42'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#connect'>
+      <code>
+        connect<span class='gray'>(conn, koop, optional)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Connect to the db with a connection string</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>conn</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the connection string to the db with user/pass/host/dbname</p>
+</td>
+          </tr>
+          <tr>
+            <td>koop</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>an instance of koop, mainlt for central/shared logging</p>
+</td>
+          </tr>
+          <tr>
+            <td>optional</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>callback for when the db is ready</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='countdistinctgeohash'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L857-L874'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#countdistinctgeohash'>
+      <code>
+        countDistinctGeoHash<span class='gray'>(table, precision, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Get the count of distinct geohashes for a query</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to query</p>
+</td>
+          </tr>
+          <tr>
+            <td>precision</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the precision at which to extract the distinct geohash counts    * @param {Object} options - optional params like where and geometry</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createfilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L221-L230'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createfilterfromsql'>
+      <code>
+        createFilterFromSql<span class='gray'>(sql, fields)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Determines if a range or like filter is needed   * appends directly to the sql passed in</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>sql</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>a sql where clause</p>
+</td>
+          </tr>
+          <tr>
+            <td>fields</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></code>
+            </td>
+            <td><p>a list of fields in to support coded value domains</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='creategeohash'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L585-L594'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#creategeohash'>
+      <code>
+        createGeohash<span class='gray'>(feature, precision)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a geohash from a features
+computes the centroid of lines and polygons</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>feature</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>a geojson feature</p>
+</td>
+          </tr>
+          <tr>
+            <td>precision</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+            </td>
+            <td><p>the precision at which the geohash will be created</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code></code>
+      :
+      <span class='force-inline'>
+        <p>geohash</p>
+
+      </span>
+
+
+
+
+
+</section>
+<section id='createlikefilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L197-L213'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createlikefilterfromsql'>
+      <code>
+        createLikeFilterFromSql<span class='gray'>(sql, fields)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Create a &quot;like&quot; filter for query string values</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>sql</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>a sql where clause</p>
+</td>
+          </tr>
+          <tr>
+            <td>fields</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></code>
+            </td>
+            <td><p>a list of fields in to support coded value domains</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createrangefilterfromsql'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L143-L190'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createrangefilterfromsql'>
+      <code>
+        createRangeFilterFromSql<span class='gray'>(sql, fields)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a &quot;range&quot; filter for querying numeric values</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>sql</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>a sql where clause</p>
+</td>
+          </tr>
+          <tr>
+            <td>fields</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></code>
+            </td>
+            <td><p>a list of fields in to support coded value domains</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='createwherefromsql'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L239-L268'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#createwherefromsql'>
+      <code>
+        createWhereFromSql<span class='gray'>(where, fields)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a viable SQL where clause from a passed in SQL (from a url &quot;where&quot; param)</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>where</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>a sql where clause</p>
+</td>
+          </tr>
+          <tr>
+            <td>fields</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></code>
+            </td>
+            <td><p>a list of fields in to support coded value domains</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+      <h4>Returns</h4>
+      <code><code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code></code>
+      :
+      <span class='force-inline'>
+        <p>sql</p>
+
+      </span>
+
+
+
+
+
+</section>
+<section id='droptable'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L626-L628'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#droptable'>
+      <code>
+        dropTable<span class='gray'>(table, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Drops a table from the DB</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to drop</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='geohashagg'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L773-L848'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#geohashagg'>
+      <code>
+        geoHashAgg<span class='gray'>(table, limit, precision, options, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Get a geohash aggregation for a set of features in the db
+this will auto-reduce the precision of the geohashes if the given   * precision exceeds the given limit.</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to query</p>
+</td>
+          </tr>
+          <tr>
+            <td>limit</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+            </td>
+            <td><p>the max number of geohash to send back</p>
+</td>
+          </tr>
+          <tr>
+            <td>precision</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the precision at which to extract geohashes</p>
+</td>
+          </tr>
+          <tr>
+            <td>options</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>optional params like where and geometry</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='getcount'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L51-L78'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#getcount'>
+      <code>
+        getCount<span class='gray'>(table, options, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets the count of all features in a table</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table name</p>
+</td>
+          </tr>
+          <tr>
+            <td>options</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>optional params from the querystring like where and geometry</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>returns the count</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='getinfo'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L86-L95'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#getinfo'>
+      <code>
+        getInfo<span class='gray'>(table, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets the info/metadata from the koopinfo table in the db</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table name</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>returns the info Object</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='getstat'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L886-L952'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#getstat'>
+      <code>
+        getStat<span class='gray'>(table, field, outName, type, options, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets a statistic on one field at a time
+Supports where and geometry filters and group by</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>to get data from</p>
+</td>
+          </tr>
+          <tr>
+            <td>field</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>to generate stats from</p>
+</td>
+          </tr>
+          <tr>
+            <td>outName</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the name of the stat field</p>
+</td>
+          </tr>
+          <tr>
+            <td>type</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the stat type: min, max, avg, count, var, stddev</p>
+</td>
+          </tr>
+          <tr>
+            <td>options</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>optional params for the query: where, geometry, groupBy</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>when the query is done</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='insert'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L436-L524'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#insert'>
+      <code>
+        insert<span class='gray'>(id, geojson, layerId, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Creates a table and inserts features and metadat
+creates indexes for each property in the features and substring indexes on geohashes</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the dataset id to insert into</p>
+</td>
+          </tr>
+          <tr>
+            <td>geojson</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>geojson features</p>
+</td>
+          </tr>
+          <tr>
+            <td>layerId</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+            </td>
+            <td><p>the layer id for this dataset</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='insertpartial'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L535-L555'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#insertpartial'>
+      <code>
+        insertPartial<span class='gray'>(id, geojson, layerId, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Inserts an array of features
+used as a way to insert pages of features, and only features, not metadata</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the dataset id to insert into</p>
+</td>
+          </tr>
+          <tr>
+            <td>geojson</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>geojson features</p>
+</td>
+          </tr>
+          <tr>
+            <td>layerId</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>
+            </td>
+            <td><p>the layer id for this dataset</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='parsegeometry'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L385-L425'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#parsegeometry'>
+      <code>
+        parseGeometry<span class='gray'>(geometry)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Parses a geometry Object</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>geometry</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>a geometry used for filtering data spatially</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='remove'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L602-L618'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#remove'>
+      <code>
+        remove<span class='gray'>(id, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Removes everything in the DB for a given idea
+will delete all metadata, timers, and features   *</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the dataset id to remove</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='select'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L277-L378'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#select'>
+      <code>
+        select<span class='gray'>(id, options, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Get features out of the db</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the dataset id to insert into</p>
+</td>
+          </tr>
+          <tr>
+            <td>options</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>optional params used for filtering features (where, geometry, etc)</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='servicecount'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L663-L672'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#servicecount'>
+      <code>
+        serviceCount<span class='gray'>(type, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets the count of the number of services registered for a given type</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>type</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the type of service: agol, socrata, ckan, etc.</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='serviceget'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L696-L715'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#serviceget'>
+      <code>
+        serviceGet<span class='gray'>(type, id, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets a service for a given type and id
+if no id is sent it returns an array of every service for that type</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>type</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the type of service: agol, socrata, ckan, etc.</p>
+</td>
+          </tr>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the id to use for the service</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='serviceregister'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L637-L655'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#serviceregister'>
+      <code>
+        serviceRegister<span class='gray'>(type, info, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Register a new service in the DB with the given type and info</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>type</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the type of service: agol, socrata, ckan, etc.</p>
+</td>
+          </tr>
+          <tr>
+            <td>info</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>Object containing a host and id for this service</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='serviceremove'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L681-L686'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#serviceremove'>
+      <code>
+        serviceRemove<span class='gray'>(type, id, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Removes a service for a given type and id from the DB</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>type</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the type of service: agol, socrata, ckan, etc.</p>
+</td>
+          </tr>
+          <tr>
+            <td>id</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the id to use for the service</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='timerget'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L745-L757'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#timerget'>
+      <code>
+        timerGet<span class='gray'>(table, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Gets the current timer for a given table
+timers are used throttle API calls by preventing providers from   * over-calling an API.</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to query</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='timerset'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L723-L736'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#timerset'>
+      <code>
+        timerSet<span class='gray'>(table, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Sets new timer for a given table</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table to query</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>the callback when the query returns</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+<section id='updateinfo'class='mt2 mb2 py1 px2 keyline-top'>
+    <div class='right py2'>
+      <a class='fade font-smaller' href='https://github.com/koopjs/koop-pgcache/blob/aeded42b5f075829b153f36a2c30562def8a46bc/index.js#L105-L114'><code>index.js</code></a>
+    </div>
+  <h3 class='regular'>
+    <a class='black' href='#updateinfo'>
+      <code>
+        updateInfo<span class='gray'>(table, info, callback)</span>
+      </code>
+    </a>
+  </h3>
+  <p>Updates/overwrites the info/metadata for dataset in the db</p>
+
+
+    <p>
+      <table class='table-light overflow-hidden bg-cloudy-light'>
+        <thead>
+          <th class='col-3'>parameter</th>
+          <th class='col-3'>type</th>
+          <th class='col-6'>description</th>
+        </thead>
+          <tr>
+            <td>table</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></code>
+            </td>
+            <td><p>the table name</p>
+</td>
+          </tr>
+          <tr>
+            <td>info</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>
+            </td>
+            <td><p>the metadata Object to insert into the koopinfo table</p>
+</td>
+          </tr>
+          <tr>
+            <td>callback</td>
+            <td>
+              <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function">function</a></code>
+            </td>
+            <td><p>returns the info Object</p>
+</td>
+          </tr>
+      </table>
+    </p>
+
+
+
+
+
+
+
+</section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

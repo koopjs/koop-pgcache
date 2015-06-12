@@ -822,7 +822,7 @@ module.exports = {
     var sql = 'select exists(select * from information_schema.tables where table_name=\'' + name + '\')'
     this._query(sql, function (err, result) {
       if (err) {
-        callback('Failed to create table ' + name)
+        callback('Failed to create table ' + name, sql)
       } else {
         if (result && !result.rows[0].exists) {
           var create = 'CREATE TABLE "' + name + '" ' + schema

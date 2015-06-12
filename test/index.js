@@ -29,7 +29,7 @@ describe('pgCache Model Tests', function () {
   describe('when creating DB tables', function () {
     it('create a table w/o erroring', function (done) {
       var name = 'testtable',
-        schema = '(id varchar(100), host varchar(100))',
+        schema = '(id varchar(100), feature json)',
         indexes = []
 
       pgCache._createTable(name, schema, indexes, function (err) {

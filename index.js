@@ -384,7 +384,7 @@ module.exports = {
    */
   parseGeometry: function (geometry) {
     var geom = geometry
-    var bbox
+    var bbox = { spatialReference: {wkid: 4326} }
     if (!geom) {
       return false
     }
@@ -394,7 +394,6 @@ module.exports = {
       } catch(e) {
         try {
           if (geom.split(',').length === 4) {
-            bbox = { spatialReference: {wkid: 4326} }
             var extent = geom.split(',')
             bbox.xmin = extent[0]
             bbox.ymin = extent[1]
@@ -409,12 +408,14 @@ module.exports = {
       // is this a valid geometry Object that has a spatial ref different than 4326?
       var mins = merc.inverse([geom.xmin, geom.ymin]),
         maxs = merc.inverse([geom.xmax, geom.ymax])
-      bbox = { spatialReference: {wkid: 4326} }
       bbox.xmin = mins[0]
       bbox.ymin = mins[1]
       bbox.xmax = maxs[0]
       bbox.ymax = maxs[1]
+    } else {
+      bbox = geom
     }
+
     // check to make sure everything is numeric
     if (this.isNumeric(bbox.xmin) && this.isNumeric(bbox.xmax) &&
         this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {

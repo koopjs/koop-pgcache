@@ -276,6 +276,47 @@ describe('pgCache Model Tests', function () {
 
   })
 
+  describe('when parsing geometries', function () {
+    it('should parse string geometries', function (done) {
+      var geom = pgCache.parseGeometry('11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532')
+      geom.xmin.should.equal('11.296916335529545')
+      geom.ymin.should.equal('50.976109119993865')
+      geom.xmax.should.equal('14.273970437121521')
+      geom.ymax.should.equal('52.39566469623532')
+      done()
+    })
+
+    it('should parse object geometries', function (done) {
+      var input = {
+        xmin: -123.75,
+        ymin: 48.922499263758255,
+        xmax: -112.5,
+        ymax: 55.7765730186677,
+        spatialReference: {
+          wkid: 4326
+        }
+      }
+      var geom = pgCache.parseGeometry(input)
+      geom.xmin.should.equal(-123.75)
+      done()
+    })
+
+    it('should parse object geometries in 102100', function (done) {
+      var input = {
+        xmin: -123.75,
+        ymin: 48.922499263758255,
+        xmax: -112.5,
+        ymax: 55.7765730186677,
+        spatialReference: {
+          wkid: 102100
+        }
+      }
+      var geom = pgCache.parseGeometry(input)
+      geom.xmin.should.equal(-0.0011116651640979078)
+      done()
+    })
+  })
+
   describe('when filtering with coded domains', function () {
 
     var fields = [{

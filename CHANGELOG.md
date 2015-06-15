@@ -2,18 +2,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.0.1] - 2015-06-15
 ### Fixed
 * Geometry objects passed in as strings were not correctly being parsed in the parseGeometry method.
-### Added 
+### Added
 * better test coverage for parseGeometry
 
 ## [1.0.0] - 2015-06-15
-### Added 
+### Added
 * Created getExtent method that returns the extent of all features in the DB.
 
 ## [0.2.2] - 2015-06-14
-### Fixed 
+### Fixed
 * BBOX geometries from tile requests were not being handled correctly, fixed else statement by defining bbox as the input geometry.
 
 ## [0.2.1] - 2015-06-12
@@ -27,7 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.2.0] - 2015-06-11
 ### Added
 * getStat supports getting a statistic from the db directly
-* tests for get stat 
+* tests for get stat
 
 ## [0.1.6] - 2015-06-11
 ### Changed
@@ -81,6 +81,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.0.1]: https://github.com/Esri/koop-pgcache/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Esri/koop-pgcache/compare/v0.2.2...v1.0.0
 [0.2.2]: https://github.com/Esri/koop-pgcache/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Esri/koop-pgcache/compare/v0.2.0...v0.2.1

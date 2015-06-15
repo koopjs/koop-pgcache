@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.1] - 2015-06-15
 ### Fixed
 * Geometry objects passed in as strings were not correctly being parsed in the parseGeometry method.
+
 ### Added
 * better test coverage for parseGeometry
 

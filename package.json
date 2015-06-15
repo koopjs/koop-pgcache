@@ -19,6 +19,14 @@
     "winston": "^0.9.0"
   },
   "homepage": "https://github.com/koopjs/koop-pgcache",
+  "keywords": [
+    "cache",
+    "data",
+    "etl",
+    "koop",
+    "plugin",
+    "postgis"
+  ],
   "license": "Apache-2.0",
   "main": "index.js",
   "repository": {
@@ -27,13 +35,5 @@
   },
   "scripts": {
     "test": "standard && mocha test/ -t 20000"
-  },
-  "keywords": [
-    "koop",
-    "postgis",
-    "cache",
-    "data",
-    "plugin",
-    "etl"
-  ]
+  }
 }

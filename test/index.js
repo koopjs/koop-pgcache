@@ -312,18 +312,25 @@ describe('pgCache Model Tests', function () {
       done()
     })
 
+    it('should parse object geometries as strings', function (done) {
+      var input = '{"xmin":-15028131.257092925, "ymin":3291933.865166463, "xmax":-10018754.171396945, "ymax":8301310.950862443, "spatialReference":{"wkid":102100, "latestWkid":3857}}'
+      var geom = pgCache.parseGeometry(input)
+      geom.xmin.should.equal(-135.00000000000892)
+      done()
+    })
+
     it('should parse object geometries in 102100', function (done) {
       var input = {
-        xmin: -123.75,
-        ymin: 48.922499263758255,
-        xmax: -112.5,
-        ymax: 55.7765730186677,
+        xmin: -15028131.257092925,
+        ymin: 3291933.865166463,
+        xmax: -10018754.171396945,
+        ymax: 8301310.950862443,
         spatialReference: {
           wkid: 102100
         }
       }
       var geom = pgCache.parseGeometry(input)
-      geom.xmin.should.equal(-0.0011116651640979078)
+      geom.xmin.should.equal(-135.00000000000892)
       done()
     })
   })

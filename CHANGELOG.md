@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Geometry objects passed in as strings were not correctly being parsed in the parseGeometry method.
+### Added 
+* better test coverage for parseGeometry
+
 ## [1.0.0] - 2015-06-15
 ### Added 
 * Created getExtent method that returns the extent of all features in the DB.

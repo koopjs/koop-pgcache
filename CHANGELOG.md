@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.3.0] - 2015-06-15
+## [1.0.0] - 2015-06-15
 ### Added 
 * Created getExtent method that returns the extent of all features in the DB.
 
@@ -75,7 +75,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
-[0.3.0]: https://github.com/Esri/koop-pgcache/compare/v0.2.2...v0.3.0
+[1.0.0]: https://github.com/Esri/koop-pgcache/compare/v0.2.2...v1.0.0
 [0.2.2]: https://github.com/Esri/koop-pgcache/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Esri/koop-pgcache/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Esri/koop-pgcache/compare/v0.1.6...v0.2.0

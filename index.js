@@ -361,7 +361,6 @@ module.exports = {
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
           select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
         }
-
         self._query(select.replace(/ id, feature->>'properties' as props, feature->>'geometry' as geom /, ' count(*) as count '), function (err, result) {
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
             callback(null, [{
@@ -426,32 +425,39 @@ module.exports = {
 
   /**
    * Parses a geometry Object
+   * TODO this method needs some to support other geometry types. Right now it assumes Envelopes
    *
    * @param {string} geometry - a geometry used for filtering data spatially
    */
   parseGeometry: function (geometry) {
-    var geom = geometry
-    var bbox = { spatialReference: {wkid: 4326} }
-    if (!geom) {
+    var geom,
+      bbox = { spatialReference: {wkid: 4326} }
+    if (!geometry) {
       return false
     }
-    if (typeof (geom) === 'string') {
+
+    if (typeof (geometry) === 'string') {
       try {
-        geom = JSON.parse(geom)
+        geom = JSON.parse(geometry)
       } catch(e) {
         try {
-          if (geom.split(',').length === 4) {
-            var extent = geom.split(',')
-            bbox.xmin = extent[0]
-            bbox.ymin = extent[1]
-            bbox.xmax = extent[2]
-            bbox.ymax = extent[3]
+          if (geometry.split(',').length === 4) {
+            geom = bbox
+            var extent = geometry.split(',')
+            geom.xmin = extent[0]
+            geom.ymin = extent[1]
+            geom.xmax = extent[2]
+            geom.ymax = extent[3]
           }
         } catch(error) {
           this.log.error('Error building bbox from query ' + geometry)
         }
       }
-    } else if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
+    } else {
+      geom = geometry
+    }
+
+    if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
       // is this a valid geometry Object that has a spatial ref different than 4326?
       var mins = merc.inverse([geom.xmin, geom.ymin]),
         maxs = merc.inverse([geom.xmax, geom.ymax])
@@ -459,10 +465,9 @@ module.exports = {
       bbox.ymin = mins[1]
       bbox.xmax = maxs[0]
       bbox.ymax = maxs[1]
-    } else {
+    } else if (geom && geom.spatialReference && geom.spatialReference.wkid === 4326) {
       bbox = geom
     }
-
     // check to make sure everything is numeric
     if (this.isNumeric(bbox.xmin) && this.isNumeric(bbox.xmax) &&
         this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {

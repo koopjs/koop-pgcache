@@ -86,7 +86,7 @@ module.exports = {
    */
   getExtent: function (table, options, callback) {
     var self = this
-    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM " + table + '"'
+    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM \"" + table + '"'
     if (options.where) {
       if (options.where !== '1=1') {
         var clause = this.createWhereFromSql(options.where)
@@ -107,10 +107,19 @@ module.exports = {
       if (err || !result || !result.rows || !result.rows.length) {
         callback('Key Not Found ' + table, null)
       } else {
-        var extent = result.rows[0].extent
-        var bbox = extent
-        self.log.debug('Get Extent', extent, select)
-        callback(null, bbox)
+        var bbox = JSON.parse(result.rows[0].extent).coordinates
+        var extent = {
+          xmin: bbox[0][0][0],
+          ymin: bbox[0][0][1],
+          xmax: bbox[0][2][0],
+          ymax: bbox[0][2][1],
+          spatialReference: {
+            wkid: 4326,
+            latestWkid: 4326
+          }
+        }
+        self.log.debug('Get Extent %s %s', table, extent)
+        callback(null, extent)
       }
     })
   },

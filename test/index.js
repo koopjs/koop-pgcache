@@ -276,8 +276,11 @@ describe('pgCache Model Tests', function () {
 
     it('should get feature extent', function (done) {
       pgCache.getExtent(key + ':0', {}, function (err, extent) {
-        if (err) throw err
-        // extent.length.should.equal(4)
+        should.not.exist(err)
+        should.exist(extent.xmin)
+        should.exist(extent.ymin)
+        should.exist(extent.xmax)
+        should.exist(extent.ymax)
         done()
       })
     })

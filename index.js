@@ -1,8 +1,8 @@
-var Pg = require('pg'),
-  ngeohash = require('ngeohash'),
-  centroid = require('turf-centroid'),
-  Sm = require('sphericalmercator'),
-  merc = new Sm({size: 256})
+var Pg = require('pg')
+var ngeohash = require('ngeohash')
+var centroid = require('turf-centroid')
+var Sm = require('sphericalmercator')
+var merc = new Sm({size: 256})
 
 module.exports = {
   geohashPrecision: 8,
@@ -148,7 +148,6 @@ module.exports = {
    * @param {Object} info - the metadata Object to insert into the koopinfo table
    * @param {function} callback - returns the info Object
    */
-  // updates the info doc for a key
   updateInfo: function (table, info, callback) {
     this.log.debug('Updating info %s %s', table, info.status)
     this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + table + ':info\'', function (err, result) {
@@ -233,8 +232,8 @@ module.exports = {
     } else {
       return field + ' ' + type + ' \'' + value.replace(/'/g, '') + '\''
     }
-
   },
+
    /**
    * Create a "like" filter for query string values
    *
@@ -286,8 +285,9 @@ module.exports = {
   createWhereFromSql: function (where, fields) {
     var self = this
     var terms = where.split(' AND ')
-    var pairs, andWhere = [], orWhere = []
-    // var filter
+    var andWhere = []
+    var orWhere = []
+    var pairs
 
     terms.forEach(function (term) {
       // trim spaces
@@ -430,13 +430,12 @@ module.exports = {
    * @param {string} geometry - a geometry used for filtering data spatially
    */
   parseGeometry: function (geometry) {
-    var geom,
-      bbox = { spatialReference: {wkid: 4326} }
-    if (!geometry) {
-      return false
-    }
+    var bbox = { spatialReference: {wkid: 4326} }
+    var geom
 
-    if (typeof (geometry) === 'string') {
+    if (!geometry) return false
+
+    if (typeof geometry === 'string') {
       try {
         geom = JSON.parse(geometry)
       } catch(e) {
@@ -459,8 +458,9 @@ module.exports = {
 
     if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
       // is this a valid geometry Object that has a spatial ref different than 4326?
-      var mins = merc.inverse([geom.xmin, geom.ymin]),
-        maxs = merc.inverse([geom.xmax, geom.ymax])
+      var mins = merc.inverse([geom.xmin, geom.ymin])
+      var maxs = merc.inverse([geom.xmax, geom.ymax])
+
       bbox.xmin = mins[0]
       bbox.ymin = mins[1]
       bbox.xmax = maxs[0]
@@ -897,7 +897,6 @@ module.exports = {
         }
       })
     })
-
   },
 
   /**
@@ -1120,5 +1119,4 @@ module.exports = {
     schema += props.join(',') + ')'
     return schema
   }
-
 }

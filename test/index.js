@@ -1,35 +1,29 @@
 /*global before, describe, beforeEach, it, afterEach */
-var should = require('should'),
-  fs = require('fs'),
-  Logger = require('./logger'),
-  key,
-  repoData,
-  snowData,
-  pgCache
+
+var should = require('should')
+var fs = require('fs')
+var Logger = require('./logger')
+var key = 'test:repo:file'
+var repoData = require('./fixtures/data.geojson')
+var snowData = require('./fixtures/snow.geojson')
+var pgCache = require('../')
+var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
 
 before(function (done) {
-  key = 'test:repo:file'
-  repoData = require('./fixtures/data.geojson')
-  snowData = require('./fixtures/snow.geojson')
-  pgCache = require('../')
-  var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
-
   pgCache.connect(config.db.conn, {}, function () {
+    config.logfile = __dirname + '/test.log'
+    pgCache.log = new Logger(config)
     done()
   })
-
-  // init the koop log based on config params
-  config.logfile = __dirname + '/test.log'
-  pgCache.log = new Logger(config)
 })
 
 describe('pgCache Model Tests', function () {
 
   describe('when creating DB tables', function () {
     it('create a table w/o erroring', function (done) {
-      var name = 'testtable',
-        schema = '(id varchar(100), feature json, geom Geometry(POINT, 4326))',
-        indexes = []
+      var name = 'testtable'
+      var schema = '(id varchar(100), feature json, geom Geometry(POINT, 4326))'
+      var indexes = []
 
       pgCache._createTable(name, schema, indexes, function (err) {
         should.not.exist(err)
@@ -357,8 +351,8 @@ describe('pgCache Model Tests', function () {
       }
     }]
 
-    var value = 0,
-      fieldName = 'NAME'
+    var value = 0
+    var fieldName = 'NAME'
 
     it('should replace value', function (done) {
       value = pgCache.applyCodedDomains(fieldName, value, fields)
@@ -369,11 +363,11 @@ describe('pgCache Model Tests', function () {
   })
 
   describe('when creating geohash aggregations', function () {
-    var gKey = 'test:german:data4',
-      data = require('./fixtures/germany.json'),
-      limit = 1000,
-      precision = 8,
-      options = { name: 'german-data', geomType: 'Point', features: data.features }
+    var gKey = 'test:german:data4'
+    var data = require('./fixtures/germany.json')
+    var limit = 1000
+    var precision = 8
+    var options = { name: 'german-data', geomType: 'Point', features: data.features }
 
     it('should create a geohash', function (done) {
       pgCache.remove(gKey + ':0', function (err, result) {
@@ -442,13 +436,13 @@ describe('pgCache Model Tests', function () {
   })
 
   describe('when getting stats ', function () {
-    var table = 'test:german:data5',
-      data = require('./fixtures/germany.json'),
-      options = {
-        name: 'german-data',
-        geomType: 'Point',
-        features: data.features
-      }
+    var table = 'test:german:data5'
+    var data = require('./fixtures/germany.json')
+    var options = {
+      name: 'german-data',
+      geomType: 'Point',
+      features: data.features
+    }
 
     beforeEach(function (done) {
       pgCache.remove(table + ':0', function () {
@@ -464,12 +458,12 @@ describe('pgCache Model Tests', function () {
       })
     })
 
-    var field = 'ID',
-      outName = 'stat'
+    var field = 'ID'
+    var outName = 'stat'
 
     it('should generate a min value', function (done) {
-      var type = 'min',
-        options = {}
+      var type = 'min'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -479,8 +473,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate a max value', function (done) {
-      var type = 'max',
-        options = {}
+      var type = 'max'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -490,8 +484,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate a avg value', function (done) {
-      var type = 'avg',
-        options = {}
+      var type = 'avg'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -501,8 +495,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate a var value', function (done) {
-      var type = 'var',
-        options = {}
+      var type = 'var'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -512,8 +506,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate a stddev value', function (done) {
-      var type = 'stddev',
-        options = {}
+      var type = 'stddev'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -523,8 +517,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate a count value', function (done) {
-      var type = 'count',
-        options = {}
+      var type = 'count'
+      var options = {}
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -534,8 +528,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate grouped count values with a groupby option', function (done) {
-      var type = 'count',
-        options = {groupby: 'Land'}
+      var type = 'count'
+      var options = { groupby: 'Land' }
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -545,8 +539,8 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate grouped count values with multiple groupby options', function (done) {
-      var type = 'count',
-        options = {groupby: ['Land', 'Art']}
+      var type = 'count'
+      var options = { groupby: ['Land', 'Art'] }
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
@@ -556,10 +550,10 @@ describe('pgCache Model Tests', function () {
     })
 
     it('should generate stats with a geometry filters', function (done) {
-      var type = 'count',
-        options = {
-          geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532'
-        }
+      var type = 'count'
+      var options = {
+        geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532'
+      }
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)

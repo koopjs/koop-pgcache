@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Style rewrites for standard bump
+
 ## [1.0.1] - 2015-06-15
 ### Fixed
 * Geometry objects passed in as strings were not correctly being parsed in the parseGeometry method.

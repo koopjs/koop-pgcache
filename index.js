@@ -69,7 +69,9 @@ module.exports = {
 
     this._query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         self.log.debug('Get Count', result.rows[0].count, select)
         callback(null, parseInt(result.rows[0].count, 10))
@@ -105,7 +107,9 @@ module.exports = {
 
     this._query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         var bbox = JSON.parse(result.rows[0].extent).coordinates
         var extent = {
@@ -133,7 +137,9 @@ module.exports = {
   getInfo: function (table, callback) {
     this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info\'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         var info = result.rows[0].info
         callback(null, info)
@@ -152,7 +158,9 @@ module.exports = {
     this.log.debug('Updating info %s %s', table, info.status)
     this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + table + ':info\'', function (err, result) {
       if (err || !result) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         callback(null, true)
       }
@@ -327,7 +335,7 @@ module.exports = {
 
     this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + '\'', function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Not Found', [])
+        callback(new Error('Resource not found'), [])
       } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
         callback(null, [{ status: 'processing' }])
       } else {
@@ -758,10 +766,12 @@ module.exports = {
       sql = 'select * from "' + type + '" where id=\'' + id + "\'"
       self._query(sql, function (err, res) {
         if (err || !res || !res.rows || !res.rows.length) {
-          err = 'No service found by that id'
-          callback(err, null)
+          var error = new Error('Resource not found')
+          error.id = id
+          error.type = type
+          callback(error, null)
         } else {
-          callback(err, res.rows[0])
+          callback(null, res.rows[0])
         }
       })
     }

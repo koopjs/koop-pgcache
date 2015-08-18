@@ -156,7 +156,7 @@ describe('pgCache Model Tests', function () {
         pgCache.insert(gKey, { name: 'german-data', geomType: 'Point', features: data.features }, 0, function (error, success) {
           should.not.exist(error)
           success.should.equal(true)
-          pgCache.select(gKey, { layer: 0, where: 'ID >= 2894 AND ID <= \'2997\''}, function (err, res) {
+          pgCache.select(gKey, {layer: 0, where: 'ID >= 2894 AND ID <= \'2997\''}, function (err, res) {
             if (err) throw err
             should.not.exist(error)
             res[0].features.length.should.equal(7)

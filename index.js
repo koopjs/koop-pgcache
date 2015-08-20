@@ -1,10 +1,15 @@
 var Pg = require('pg')
 var ngeohash = require('ngeohash')
 var centroid = require('turf-centroid')
-var Sm = require('sphericalmercator')
-var merc = new Sm({size: 256})
+var SM = require('sphericalmercator')
+var merc = new SM({ size: 256 })
+var pkg = require('./package')
 
 module.exports = {
+  type: 'cache',
+  name: 'postgis',
+  version: pkg.version,
+
   geohashPrecision: 8,
   infoTable: 'koopinfo',
   timerTable: 'kooptimers',

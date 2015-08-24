@@ -489,7 +489,7 @@ describe('pgCache Model Tests', function () {
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
-        res[0][outName].should.equal(3427)
+        Math.floor(res[0][outName]).should.equal(3427)
         done()
       })
     })
@@ -500,7 +500,7 @@ describe('pgCache Model Tests', function () {
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
-        res[0][outName].should.equal(16793)
+        Math.floor(res[0][outName]).should.equal(16793)
         done()
       })
     })
@@ -511,7 +511,7 @@ describe('pgCache Model Tests', function () {
 
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
-        res[0][outName].should.equal(130)
+        Math.floor(res[0][outName]).should.equal(129)
         done()
       })
     })

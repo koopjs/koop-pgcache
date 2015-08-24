@@ -958,11 +958,11 @@ module.exports = {
     // build sql
     var fieldName
     if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {
-      fieldName = "(feature->'properties'->>'" + field + "')::int"
+      fieldName = "(feature->'properties'->>'" + field + "')::float"
     } else {
       fieldName = "feature->'properties'->>'" + field + "'"
     }
-    var fieldSql = type.toLowerCase() + '(' + fieldName + ')::int as "' + outName + '\"'
+    var fieldSql = type.toLowerCase() + '(' + fieldName + ')::float as "' + outName + '\"'
 
     // add groupby
     var groupByAs, groupBy

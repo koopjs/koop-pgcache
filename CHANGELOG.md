@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Changed
+* Stats are requested as float
+
+### Fixed
+* Intermittent off-by-one errors in tests are no more
+
 ## [1.1.0] - 2014-08-20
 ### Added
 * name, type, and version are now included in exports

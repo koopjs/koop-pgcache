@@ -347,9 +347,9 @@ module.exports = {
         var info = result.rows[0].info
         var select
         if (options.simplify) {
-          select = 'select id, feature->>\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->>\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
+          select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
         } else {
-          select = 'select id, feature->>\'properties\' as props, feature->>\'geometry\' as geom from "' + id + ':' + layer + '"'
+          select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + layer + '"'
         }
 
         // parse the where clause
@@ -374,7 +374,8 @@ module.exports = {
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
           select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
         }
-        self._query(select.replace(/ id, feature->>'properties' as props, feature->>'geometry' as geom /, ' count(*) as count '), function (err, result) {
+        // TODO don't do a count here, limits shouldn't be set at the DB level
+        self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
             callback(null, [{
               exceeds_limit: true,
@@ -408,8 +409,8 @@ module.exports = {
                   features.push({
                     'type': 'Feature',
                     'id': row.id,
-                    'geometry': JSON.parse(row.geom),
-                    'properties': JSON.parse(row.props)
+                    'geometry': row.geom,
+                    'properties': row.props
                   })
                 })
                 callback(null, [{

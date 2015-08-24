@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ### Changed
 * Stats are requested as float
+* Request data from the DB as JSON instead of strings
 
 ### Fixed
 * Intermittent off-by-one errors in tests are no more

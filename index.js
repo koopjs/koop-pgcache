@@ -689,7 +689,7 @@ module.exports = {
    */
   serviceRegister: function (type, info, callback) {
     var self = this
-    this._createTable(type, '(id varchar(100), host varchar(2048))', null, function (err, result) {
+    this._createTable(type, '(id varchar(100), host varchar)', null, function (err, result) {
       if (err) {
         callback(err)
       } else {

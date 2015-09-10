@@ -18,7 +18,6 @@ before(function (done) {
 })
 
 describe('pgCache Model Tests', function () {
-
   describe('when creating DB tables', function () {
     it('create a table w/o erroring', function (done) {
       var name = 'testtable'
@@ -33,7 +32,6 @@ describe('pgCache Model Tests', function () {
   })
 
   describe('when caching geojson', function () {
-
     beforeEach(function (done) {
       pgCache.insert(key, repoData[0], 0, function (err) {
         if (err) {
@@ -187,7 +185,6 @@ describe('pgCache Model Tests', function () {
       pgCache.remove(gKey + ':0', function (err, result) {
         if (err) console.log(err)
         pgCache.insert(gKey, { name: 'german-data', geomType: 'Point', features: data.features }, 0, function (error, success) {
-
           should.not.exist(error)
           success.should.equal(true)
 
@@ -217,7 +214,6 @@ describe('pgCache Model Tests', function () {
       pgCache.remove(gKey + ':0', function (err, result) {
         if (err) throw err
         pgCache.insert(gKey, { name: 'german-data', geomType: 'Point', features: data.features }, 0, function (error, success) {
-
           should.not.exist(error)
           success.should.equal(true)
 
@@ -246,7 +242,6 @@ describe('pgCache Model Tests', function () {
       pgCache.remove(gKey + ':0', function (err, result) {
         if (err) throw err
         pgCache.insert(gKey, { name: 'german-data', geomType: 'Point', features: data.features }, 0, function (error, success) {
-
           should.not.exist(error)
           success.should.equal(true)
 
@@ -286,7 +281,6 @@ describe('pgCache Model Tests', function () {
         done()
       })
     })
-
   })
 
   describe('when parsing geometries', function () {
@@ -338,7 +332,6 @@ describe('pgCache Model Tests', function () {
   })
 
   describe('when filtering with coded domains', function () {
-
     var fields = [{
       name: 'NAME',
       type: 'esriFieldTypeSmallInteger',
@@ -367,7 +360,6 @@ describe('pgCache Model Tests', function () {
       value.should.equal('Name0')
       done()
     })
-
   })
 
   describe('when creating geohash aggregations', function () {
@@ -569,7 +561,5 @@ describe('pgCache Model Tests', function () {
         done()
       })
     })
-
   })
-
 })

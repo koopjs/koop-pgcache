@@ -281,7 +281,6 @@ module.exports = {
     if (sql.indexOf(' like ') > -1) {
       // like
       return this.createLikeFilterFromSql(sql, fields)
-
     } else if (sql.indexOf(' < ') > -1 || sql.indexOf(' > ') > -1 || sql.indexOf(' >= ') > -1 || sql.indexOf(' <= ') > -1 || sql.indexOf(' = ') > -1) {
       // part of a range
       return this.createRangeFilterFromSql(sql, fields)
@@ -390,7 +389,6 @@ module.exports = {
               expires_at: info.expires_at,
               count: result.rows[0].count
             }])
-
           } else {
             if (options.order_by && options.order_by.length) {
               select += ' ' + self._buildSort(options.order_by)

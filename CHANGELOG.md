@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Added
+* order_by option accepts array of {field: order} e.g. {'total_precip': 'ASC'}
+
 ### Changed
 * Stats are requested as float
 * Request data from the DB as JSON instead of strings

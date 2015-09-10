@@ -128,6 +128,14 @@ describe('pgCache Model Tests', function () {
       })
     })
 
+    it('should select data from the db with a order by parameter', function (done) {
+      pgCache.select(key, {layer: 0, limit: 1, order_by: [{'total precip': 'DESC'}]}, function (error, success) {
+        should.not.exist(error)
+        success[0].features[0].properties['total precip'].should.equal(1.5)
+        done()
+      })
+    })
+
     it('should insert data with no features', function (done) {
       var snowKey = 'test:snow:data'
       pgCache.insert(snowKey, {name: 'no-data', geomType: 'Point', features: []}, 0, function (error, success) {

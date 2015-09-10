@@ -50,7 +50,7 @@ module.exports = {
    * Gets the count of all features in a table
    *
    * @param {string} table - the table name
-   * @param {Object} options - optional params from the querystring like where and geometry
+   * @param {Object} options - optional params from the query string: where, geometry, order_by
    * @param {function} callback - returns the count
    */
   getCount: function (table, options, callback) {
@@ -374,6 +374,7 @@ module.exports = {
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
           select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
         }
+
         // TODO don't do a count here, limits shouldn't be set at the DB level
         self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
@@ -391,8 +392,11 @@ module.exports = {
             }])
 
           } else {
-            // ensure id order \
-            select += ' ORDER BY id'
+            if (options.order_by && options.order_by.length) {
+              select += ' ' + self._buildSort(options.order_by)
+            } else {
+              select += ' ORDER BY id'
+            }
             if (options.limit) {
               select += ' LIMIT ' + options.limit
             }
@@ -489,6 +493,21 @@ module.exports = {
     } else {
       return false
     }
+  },
+
+  /**
+  * Creates a SQL ORDER BY statement
+  *
+  * @param {array} sorts - an array of {field: order} objects
+  * @return {string} a well-formed sql order by statement
+  */
+  _buildSort: function (sorts) {
+    var order = 'ORDER BY '
+    sorts.forEach(function (field) {
+      var name = Object.keys(field)[0]
+      order += 'feature->\'properties\'->>\'' + name + '\' ' + field[name] + ', '
+    })
+    return order.slice(0, -2)
   },
 
   /**

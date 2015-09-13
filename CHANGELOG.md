@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* New methods `getWKT` & `insertWKT` for storing and retrieving well known text strings of spatial reference systems
+
 ## [1.2.0] - 2015-09-10 
 ### Added
 * order_by option accepts array of {field: order} e.g. {'total_precip': 'ASC'}

@@ -1,8 +1,9 @@
-/*global before, describe, beforeEach, it, afterEach */
+/*global before, after, describe, beforeEach, it, afterEach */
 
 var should = require('should')
 var fs = require('fs')
 var Logger = require('./logger')
+var sinon = require('sinon')
 var key = 'test:repo:file'
 var repoData = require('./fixtures/data.geojson')
 var snowData = require('./fixtures/snow.geojson')
@@ -558,6 +559,40 @@ describe('pgCache Model Tests', function () {
       pgCache.getStat(table + ':0', field, outName, type, options, function (err, res) {
         should.not.exist(err)
         res[0][outName].should.equal(26)
+        done()
+      })
+    })
+  })
+  describe('working with spatial references', function () {
+    before(function (done) {
+      sinon.stub(pgCache, '_query', function (sql, callback) {
+        callback(null, sql)
+      })
+      done()
+    })
+
+    after(function (done) {
+      pgCache._query.restore()
+      done()
+    })
+
+    it('should use the proper SQL to get the WKT', function (done) {
+      sinon.stub(pgCache, '_extractWKT', function (sql) {
+        return sql
+      })
+
+      pgCache.getWKT(1, function (err, sql) {
+        should.not.exist(err)
+        sql.should.equal('SELECT srtext FROM spatial_ref_sys WHERE srid=1;')
+        pgCache._extractWKT.restore()
+        done()
+      })
+    })
+
+    it('should use the proper SQL to insert a WKT', function (done) {
+      pgCache.insertWKT(1, 'foo', function (err, sql) {
+        should.not.exist(err)
+        sql.should.equal('INSERT INTO spatial_ref_sys (srid, srtext) VALUES (1,foo);')
         done()
       })
     })

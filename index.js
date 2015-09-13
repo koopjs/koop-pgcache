@@ -1036,6 +1036,45 @@ module.exports = {
     })
   },
 
+  /**
+   * Gets a WKT from the spatial_ref_sys table
+   *
+   * @param {integer} srid - the Spatial Reference ID
+   * @return {string} wkt - the well known text for the spatial reference system
+   */
+  getWKT: function (srid, callback) {
+    var self = this
+    var sql = 'SELECT srtext FROM spatial_ref_sys WHERE srid=' + srid + ';'
+    self._query(sql, function (err, result) {
+      if (err) return callback(err)
+      callback(null, self._extractWKT(result))
+    })
+  },
+
+  /**
+   * Wrap the return from getWKT so we can test the sql statement
+   *
+   * @param {object} result - response from the DB
+   * @return {string} - the body of the first row of the results
+   */
+  _extractWKT: function (result) {
+    return result.rows[0][0]
+  },
+
+  /**
+   * Inserts a WKT into the spatial_ref_sys table
+   *
+   * @param {integer} srid - the Spatial Reference ID
+   * @param {string} wkt - the well know ext for the spatial referfence system
+   */
+  insertWKT: function (srid, wkt, callback) {
+    var sql = 'INSERT INTO spatial_ref_sys (srid, srtext) VALUES (' + [srid, wkt].join(',') + ');'
+    this._query(sql, function (err, result) {
+      if (err) return callback(err)
+      callback(null, result)
+    })
+  },
+
   // ---------------
   // PRIVATE METHODS
   // ---------------

@@ -1,10 +1,15 @@
 var Pg = require('pg')
 var ngeohash = require('ngeohash')
 var centroid = require('turf-centroid')
-var Sm = require('sphericalmercator')
-var merc = new Sm({size: 256})
+var SM = require('sphericalmercator')
+var merc = new SM({ size: 256 })
+var pkg = require('./package')
 
 module.exports = {
+  type: 'cache',
+  name: 'postgis',
+  version: pkg.version,
+
   geohashPrecision: 8,
   infoTable: 'koopinfo',
   timerTable: 'kooptimers',
@@ -64,12 +69,14 @@ module.exports = {
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         self.log.debug('Get Count', result.rows[0].count, select)
         callback(null, parseInt(result.rows[0].count, 10))
@@ -86,7 +93,7 @@ module.exports = {
    */
   getExtent: function (table, options, callback) {
     var self = this
-    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM \"" + table + '"'
+    var select = "SELECT ST_AsGeoJSON(ST_Extent(geom)) as extent FROM \"" + table + '"'
     if (options.where) {
       if (options.where !== '1=1') {
         var clause = this.createWhereFromSql(options.where)
@@ -100,12 +107,14 @@ module.exports = {
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         var bbox = JSON.parse(result.rows[0].extent).coordinates
         var extent = {
@@ -133,7 +142,9 @@ module.exports = {
   getInfo: function (table, callback) {
     this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info\'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         var info = result.rows[0].info
         callback(null, info)
@@ -152,7 +163,9 @@ module.exports = {
     this.log.debug('Updating info %s %s', table, info.status)
     this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + table + ':info\'', function (err, result) {
       if (err || !result) {
-        callback('Key Not Found ' + table, null)
+        var error = new Error('Resource not found')
+        error.table = table
+        callback(error, null)
       } else {
         callback(null, true)
       }
@@ -324,19 +337,19 @@ module.exports = {
   select: function (id, options, callback) {
     var self = this
     var layer = (options.layer || 0)
-
     this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + '\'', function (err, result) {
+		
       if (err || !result || !result.rows || !result.rows.length) {
-        callback('Not Found', [])
+        callback(new Error('Resource not found'), [])
       } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
         callback(null, [{ status: 'processing' }])
       } else {
         var info = result.rows[0].info
         var select
         if (options.simplify) {
-          select = 'select id, feature->>\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->>\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
+          select = 'select id, feature->>\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(geom, ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
         } else {
-          select = 'select id, feature->>\'properties\' as props, feature->>\'geometry\' as geom from "' + id + ':' + layer + '"'
+          select = 'select id, feature->>\'properties\' as props, st_asgeojson(geom) as geom from "' + id + ':' + layer + '"'
         }
 
         // parse the where clause
@@ -359,7 +372,7 @@ module.exports = {
         if (box) {
           select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-          select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
+          select += 'geom && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
         }
         self._query(select.replace(/ id, feature->>'properties' as props, feature->>'geometry' as geom /, ' count(*) as count '), function (err, result) {
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
@@ -516,7 +529,7 @@ module.exports = {
     // a list of indexes to create on the new table
     var indexes = [{
       name: 'gix',
-      using: 'GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))'
+      using: 'GIST (geom)'
     }, {
       name: 'substr3',
       using: 'btree (substring(geohash,0,3))'
@@ -620,8 +633,11 @@ module.exports = {
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
       var geohash = this.createGeohash(feature, this.geohashPrecision)
-      feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
-      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
+	  feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
+	  var geometry = JSON.stringify(feature.geometry);
+      
+	  //ST_GeomFromGeoJSON('{"type":"Point","coordinates":[4.899862353052711,52.37402811266015]}')
+	  return 'insert into "' + table + '" (feature, geohash, geom) VALUES (\'' + featurestring + '\', \'' + geohash + '\',ST_GeomFromGeoJSON(\'' +geometry +'\'));'
     } else {
       return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\');'
     }
@@ -689,7 +705,7 @@ module.exports = {
    */
   serviceRegister: function (type, info, callback) {
     var self = this
-    this._createTable(type, '(id varchar(100), host varchar)', null, function (err, result) {
+    this._createTable(type, '(id varchar(100), host varchar(100))', null, function (err, result) {
       if (err) {
         callback(err)
       } else {
@@ -758,10 +774,12 @@ module.exports = {
       sql = 'select * from "' + type + '" where id=\'' + id + "\'"
       self._query(sql, function (err, res) {
         if (err || !res || !res.rows || !res.rows.length) {
-          err = 'No service found by that id'
-          callback(err, null)
+          var error = new Error('Resource not found')
+          error.id = id
+          error.type = type
+          callback(error, null)
         } else {
-          callback(err, res.rows[0])
+          callback(null, res.rows[0])
         }
       })
     }
@@ -844,7 +862,7 @@ module.exports = {
     // parse the geometry into a bbox
     if (box) {
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      options.geomFilter = " ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      options.geomFilter = " geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     // recursively get geohash counts until we have a precision
@@ -987,7 +1005,7 @@ module.exports = {
     if (box) {
       sql += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      sql += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      sql += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     if (groupBy) {

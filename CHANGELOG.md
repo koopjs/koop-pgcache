@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Info can only be retrieved by calling `getInfo`
 * Removed third parameter from _insertFeature as it was not being used for the id
 * Casting values to decimal before calling statistic functions
+* Use geometry field for spatial queries to improve speed
 
 ### Removed
 * deleted outdated docs folder (should only be committed to gh-pages)

@@ -454,7 +454,7 @@ module.exports = {
     if (typeof geometry === 'string') {
       try {
         geom = JSON.parse(geometry)
-      } catch(e) {
+      } catch (e) {
         try {
           if (geometry.split(',').length === 4) {
             geom = bbox
@@ -464,7 +464,7 @@ module.exports = {
             geom.xmax = extent[2]
             geom.ymax = extent[3]
           }
-        } catch(error) {
+        } catch (error) {
           this.log.error('Error building bbox from query ' + geometry)
         }
       }
@@ -1047,7 +1047,11 @@ module.exports = {
     var sql = 'SELECT srtext FROM spatial_ref_sys WHERE srid=' + srid + ';'
     self._query(sql, function (err, result) {
       if (err) return callback(err)
-      callback(null, self._extractWKT(result))
+      try {
+        callback(null, self._extractWKT(result))
+      } catch (e) {
+        callback(e)
+      }
     })
   },
 
@@ -1058,7 +1062,8 @@ module.exports = {
    * @return {string} - the body of the first row of the results
    */
   _extractWKT: function (result) {
-    return result.rows[0][0]
+    if (result.rows[0]) return result.rows[0].srtext
+    throw new Error('No WKT found')
   },
 
   /**

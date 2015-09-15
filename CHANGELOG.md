@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.3.0] - 2015-09-15
 ### Added
 * New methods `getWKT` & `insertWKT` for storing and retrieving well known text strings of spatial reference systems
 
@@ -109,6 +109,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.3.0]: https://github.com/Esri/koop-pgcache/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Esri/koop-pgcache/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Esri/koop-pgcache/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/Esri/koop-pgcache/compare/v1.0.0...v1.0.1

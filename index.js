@@ -1073,7 +1073,7 @@ module.exports = {
    * @param {string} wkt - the well know ext for the spatial referfence system
    */
   insertWKT: function (srid, wkt, callback) {
-    var sql = 'INSERT INTO spatial_ref_sys (srid, srtext) VALUES (' + [srid, wkt].join(',') + ');'
+    var sql = 'INSERT INTO spatial_ref_sys (srid, srtext) VALUES (' + [srid, "'" + wkt + "'"].join(',') + ');'
     this._query(sql, function (err, result) {
       if (err) return callback(err)
       callback(null, result)

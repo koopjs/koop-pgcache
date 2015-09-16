@@ -324,6 +324,7 @@ module.exports = {
     var select = self._buildQuery(id, options)
     self.log.debug('Selecting data', select)
     self._query(select, function (err, result) {
+      console.log(select, err)
       if (err) self.log.error(err)
       if (result && result.rows && result.rows.length) {
         var features = []
@@ -528,8 +529,8 @@ module.exports = {
         indexes.push(idx)
       })
     }
-
-    self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
+    var schema = '(id SERIAL PRIMARY KEY, feature JSONB, geom Geometry, geohash varchar(10))'
+    self._createTable(table, schema, indexes, function (err) {
       if (err) {
         callback(err, false)
         return
@@ -1125,26 +1126,5 @@ module.exports = {
         }
       }
     })
-  },
-
-  /**
-   * Builds a table schema from a geojson feature
-   * each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here
-   *
-   * @param {Object} feature - a geojson feature   * @returns {string} schema
-   * @private
-   */
-  _buildSchemaFromFeature: function (feature) {
-    var schema = '('
-    var type
-    if (feature && feature.geometry && feature.geometry.type) {
-      type = feature.geometry.type.toUpperCase()
-    } else {
-      // default to point geoms
-      type = 'POINT'
-    }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSONB', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
-    schema += props.join(',') + ')'
-    return schema
   }
 }

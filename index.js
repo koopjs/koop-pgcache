@@ -1133,7 +1133,7 @@ module.exports = {
       // default to point geoms
       type = 'POINT'
     }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
+    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry', 'geohash varchar(10)']
     schema += props.join(',') + ')'
     return schema
   }

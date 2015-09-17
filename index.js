@@ -1047,11 +1047,13 @@ module.exports = {
     var sql = 'SELECT srtext FROM spatial_ref_sys WHERE srid=' + srid + ';'
     self._query(sql, function (err, result) {
       if (err) return callback(err)
+      var wkt
       try {
-        callback(null, self._extractWKT(result))
+        wkt = self._extractWKT(result)
       } catch (e) {
         callback(e)
       }
+      callback(null, wkt)
     })
   },
 

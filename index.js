@@ -36,7 +36,7 @@ module.exports = {
         process.exit()
       } else {
         // creates table only if they dont exist
-        self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
+        self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSONB)', null)
         self._createTable(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
       }
       if (callback) {
@@ -503,7 +503,7 @@ module.exports = {
     var order = 'ORDER BY '
     sorts.forEach(function (field) {
       var name = Object.keys(field)[0]
-      order += 'feature->\'properties\'->>\'' + name + '\' ' + field[name] + ', '
+      order += 'feature->\'properties\'->\'' + name + '\' ' + field[name] + ', '
     })
     return order.slice(0, -2)
   },
@@ -1194,7 +1194,7 @@ module.exports = {
       // default to point geoms
       type = 'POINT'
     }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
+    var props = ['id SERIAL PRIMARY KEY', 'feature JSONB', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
     schema += props.join(',') + ')'
     return schema
   }

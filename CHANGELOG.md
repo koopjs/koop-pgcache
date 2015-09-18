@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* Script to upgrade columns to JSONB
+
+### Changed
+* Using JSONB instead of JSON
+
 ## [1.3.1] - 2015-09-15 
 ### Fixed
 * Insert WKT with proper quote escaping

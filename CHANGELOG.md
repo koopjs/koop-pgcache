@@ -3,13 +3,17 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Added
+* Script to upgrade columns to JSONB
+
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
+* Using JSONB instead of JSON
 
 ### Removed
 * deleted outdated docs folder (should only be committed to gh-pages)
 
-## [1.3.1] - 2015-09-15
+## [1.3.1] - 2015-09-15 
 ### Fixed
 * Insert WKT with proper quote escaping
 

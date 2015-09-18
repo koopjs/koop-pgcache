@@ -104,7 +104,7 @@ describe('pgCache Model Tests', function () {
     it('should select data from db', function (done) {
       pgCache.select(key, { layer: 0 }, function (error, success) {
         should.not.exist(error)
-        should.exist(success[0].features)
+        should.exist(success.features)
         done()
       })
     })
@@ -112,8 +112,8 @@ describe('pgCache Model Tests', function () {
     it('should select data from db with filter', function (done) {
       pgCache.select(key, { layer: 0, where: '\'total precip\' = \'0.31\'' }, function (error, success) {
         should.not.exist(error)
-        should.exist(success[0].features)
-        success[0].features.length.should.equal(5)
+        should.exist(success.features)
+        success.features.length.should.equal(5)
         done()
       })
     })
@@ -121,8 +121,8 @@ describe('pgCache Model Tests', function () {
     it('should select data from db with an OR filter', function (done) {
       pgCache.select(key, { layer: 0, where: '\'total precip\' = \'0.31\' OR \'total precip\' > \'0.5\'' }, function (error, success) {
         should.not.exist(error)
-        should.exist(success[0].features)
-        success[0].features.length.should.equal(120)
+        should.exist(success.features)
+        success.features.length.should.equal(120)
         done()
       })
     })
@@ -130,7 +130,7 @@ describe('pgCache Model Tests', function () {
     it('should select data from the db with a order by parameter', function (done) {
       pgCache.select(key, {layer: 0, limit: 1, order_by: [{'total precip': 'DESC'}]}, function (error, success) {
         should.not.exist(error)
-        success[0].features[0].properties['total precip'].should.equal(1.5)
+        success.features[0].properties['total precip'].should.equal(1.5)
         done()
       })
     })
@@ -166,7 +166,7 @@ describe('pgCache Model Tests', function () {
           pgCache.select(gKey, {layer: 0, where: 'ID >= 2894 AND ID <= \'2997\''}, function (err, res) {
             if (err) throw err
             should.not.exist(error)
-            res[0].features.length.should.equal(7)
+            res.features.length.should.equal(7)
             pgCache.remove(gKey + ':0', function (err, result) {
               should.not.exist(err)
               pgCache.getInfo(gKey + ':0', function (err, info) {
@@ -193,7 +193,7 @@ describe('pgCache Model Tests', function () {
             if (err) console.log(err)
 
             should.not.exist(error)
-            res[0].features.length.should.equal(2)
+            res.features.length.should.equal(2)
 
             pgCache.remove(gKey + ':0', function (err, result) {
               should.not.exist(err)
@@ -221,7 +221,7 @@ describe('pgCache Model Tests', function () {
           pgCache.select(gKey, { layer: 0, where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land = \'Poland\')  AND Art = \'BRL\'' }, function (err, res) {
             if (err) throw err
             should.not.exist(error)
-            res[0].features.length.should.equal(7)
+            res.features.length.should.equal(7)
 
             pgCache.remove(gKey + ':0', function (err, result) {
               should.not.exist(err)
@@ -249,7 +249,7 @@ describe('pgCache Model Tests', function () {
           pgCache.select(gKey, { layer: 0, geometry: '11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532' }, function (err, res) {
             if (err) throw err
             should.not.exist(error)
-            res[0].features.length.should.equal(26)
+            res.features.length.should.equal(26)
 
             pgCache.remove(gKey + ':0', function (err, result) {
               should.not.exist(err)
@@ -286,7 +286,7 @@ describe('pgCache Model Tests', function () {
 
   describe('when parsing geometries', function () {
     it('should parse string geometries', function (done) {
-      var geom = pgCache.parseGeometry('11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532')
+      var geom = pgCache._parseGeometry('11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532')
       geom.xmin.should.equal('11.296916335529545')
       geom.ymin.should.equal('50.976109119993865')
       geom.xmax.should.equal('14.273970437121521')
@@ -304,14 +304,14 @@ describe('pgCache Model Tests', function () {
           wkid: 4326
         }
       }
-      var geom = pgCache.parseGeometry(input)
+      var geom = pgCache._parseGeometry(input)
       geom.xmin.should.equal(-123.75)
       done()
     })
 
     it('should parse object geometries as strings', function (done) {
       var input = '{"xmin":-15028131.257092925, "ymin":3291933.865166463, "xmax":-10018754.171396945, "ymax":8301310.950862443, "spatialReference":{"wkid":102100, "latestWkid":3857}}'
-      var geom = pgCache.parseGeometry(input)
+      var geom = pgCache._parseGeometry(input)
       geom.xmin.should.equal(-135.00000000000892)
       done()
     })
@@ -326,7 +326,7 @@ describe('pgCache Model Tests', function () {
           wkid: 102100
         }
       }
-      var geom = pgCache.parseGeometry(input)
+      var geom = pgCache._parseGeometry(input)
       geom.xmin.should.equal(-135.00000000000892)
       done()
     })

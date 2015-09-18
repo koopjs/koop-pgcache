@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 * Using JSONB instead of JSON
+* Select only calls select from the DB, it will return features if available
+* Feature collections are returned as an object instead of as the first object in an array
+* Unused idFilter option is removed
+* Info can only be retrieved by calling `getInfo`
 
 ## [1.3.1] - 2015-09-15 
 ### Fixed

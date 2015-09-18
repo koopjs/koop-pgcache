@@ -56,16 +56,9 @@ module.exports = {
   getCount: function (table, options, callback) {
     var self = this
     var select = 'select count(*) as count from "' + table + '"'
-    if (options.where) {
-      if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
-        select += ' WHERE ' + clause
-      } else {
-        select += ' WHERE ' + options.where
-      }
-    }
+    if (options.where) select += ' WHERE ' + self.createWhereFromSql(options.where)
 
-    var box = this.parseGeometry(options.geometry)
+    var box = self._parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -94,16 +87,9 @@ module.exports = {
   getExtent: function (table, options, callback) {
     var self = this
     var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM \"" + table + '"'
-    if (options.where) {
-      if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
-        select += ' WHERE ' + clause
-      } else {
-        select += ' WHERE ' + options.where
-      }
-    }
+    if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
 
-    var box = this.parseGeometry(options.geometry)
+    var box = this._parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -295,6 +281,7 @@ module.exports = {
    * @returns {string} sql
    */
   createWhereFromSql: function (where, fields) {
+    if (where === '1=1') return where
     var self = this
     var terms = where.split(' AND ')
     var andWhere = []
@@ -335,108 +322,60 @@ module.exports = {
    */
   select: function (id, options, callback) {
     var self = this
-    var layer = (options.layer || 0)
-
-    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + '\'', function (err, result) {
-      if (err || !result || !result.rows || !result.rows.length) {
-        callback(new Error('Resource not found'), [])
-      } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
-        callback(null, [{ status: 'processing' }])
-      } else {
-        var info = result.rows[0].info
-        var select
-        if (options.simplify) {
-          select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
-        } else {
-          select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + layer + '"'
-        }
-
-        // parse the where clause
-        if (options.where) {
-          if (options.where !== '1=1') {
-            var clause = self.createWhereFromSql(options.where, options.fields)
-            select += ' WHERE ' + clause
-          } else {
-            select += ' WHERE ' + options.where
-          }
-          if (options.idFilter) {
-            select += ' AND ' + options.idFilter
-          }
-        } else if (options.idFilter) {
-          select += ' WHERE ' + options.idFilter
-        }
-
-        // parse the geometry param from GeoServices REST
-        var box = self.parseGeometry(options.geometry)
-        if (box) {
-          select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
-          var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-          select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
-        }
-
-        // TODO don't do a count here, limits shouldn't be set at the DB level
-        self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
-          if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
-            callback(null, [{
-              exceeds_limit: true,
-              type: 'FeatureCollection',
-              features: [{}],
-              name: info.name,
-              sha: info.sha,
-              info: info.info,
-              updated_at: info.updated_at,
-              retrieved_at: info.retrieved_at,
-              expires_at: info.expires_at,
-              count: result.rows[0].count
-            }])
-          } else {
-            if (options.order_by && options.order_by.length) {
-              select += ' ' + self._buildSort(options.order_by)
-            } else {
-              select += ' ORDER BY id'
-            }
-            if (options.limit) {
-              select += ' LIMIT ' + options.limit
-            }
-            if (options.offset) {
-              select += ' OFFSET ' + options.offset
-            }
-            self.log.debug('Selecting data', select)
-            self._query(select, function (err, result) {
-              if (err) self.log.error(err)
-              if (result && result.rows && result.rows.length) {
-                var features = []
-                  // feature
-                result.rows.forEach(function (row, i) {
-                  features.push({
-                    'type': 'Feature',
-                    'id': row.id,
-                    'geometry': row.geom,
-                    'properties': row.props
-                  })
-                })
-                callback(null, [{
-                  type: 'FeatureCollection',
-                  features: features,
-                  name: info.name,
-                  sha: info.sha,
-                  info: info.info,
-                  updated_at: info.updated_at,
-                  retrieved_at: info.retrieved_at,
-                  expires_at: info.expires_at,
-                  count: result.rows.length
-                }])
-              } else {
-                callback('Not Found', [{
-                  type: 'FeatureCollection',
-                  features: []
-                }])
-              }
-            })
-          }
+    var select = self._buildQuery(id, options)
+    self.log.debug('Selecting data', select)
+    self._query(select, function (err, result) {
+      if (err) self.log.error(err)
+      if (result && result.rows && result.rows.length) {
+        var features = []
+        result.rows.forEach(function (row, i) {
+          features.push({
+            'type': 'Feature',
+            'id': row.id,
+            'geometry': row.geom,
+            'properties': row.props
+          })
         })
+
+        callback(null, {
+          type: 'FeatureCollection',
+          features: features
+        })
+      } else {
+        callback(new Error('Resource not found'))
       }
     })
+  },
+
+  _buildQuery: function (id, options) {
+    var select
+    if (options.simplify) {
+      select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
+    } else {
+      select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + options.layer + '"'
+    }
+
+    if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
+
+    // parse the geometry param from GeoServices REST
+    var box = this._parseGeometry(options.geometry)
+    if (box) {
+      select += options.where ? ' AND ' : ' WHERE '
+      var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
+      select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
+    }
+
+    if (options.order_by && options.order_by.length) {
+      select += ' ' + this._buildSort(options.order_by)
+    } else {
+      select += ' ORDER BY id'
+    }
+
+    if (options.limit) select += ' LIMIT ' + options.limit
+
+    if (options.offset) select += ' OFFSET ' + options.offset
+
+    return select
   },
 
   /**
@@ -445,7 +384,7 @@ module.exports = {
    *
    * @param {string} geometry - a geometry used for filtering data spatially
    */
-  parseGeometry: function (geometry) {
+  _parseGeometry: function (geometry) {
     var bbox = { spatialReference: {wkid: 4326} }
     var geom
 
@@ -509,7 +448,7 @@ module.exports = {
   },
 
   /**
-   * Creates a table and inserts features and metadat
+   * Creates a table and inserts features and metadata
    * creates indexes for each property in the features and substring indexes on geohashes
    *
    * @param {string} id - the dataset id to insert into
@@ -873,7 +812,7 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = this._parseGeometry(options.geometry)
     // parse the geometry into a bbox
     if (box) {
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -1016,7 +955,7 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = this._parseGeometry(options.geometry)
     if (box) {
       sql += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax

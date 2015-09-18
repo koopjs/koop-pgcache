@@ -118,6 +118,14 @@ describe('pgCache Model Tests', function () {
       })
     })
 
+    it('should select data from the db with an idFilter', function (done) {
+      pgCache.select(key, {layer: 0, idFilter: 'id >= ' + 1 + ' AND id < ' + 6}, function (error, success) {
+        should.not.exist(error)
+        success.features.length.should.equal(5)
+        done()
+      })
+    })
+
     it('should select data from db with an OR filter', function (done) {
       pgCache.select(key, { layer: 0, where: '\'total precip\' = \'0.31\' OR \'total precip\' > \'0.5\'' }, function (error, success) {
         should.not.exist(error)

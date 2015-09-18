@@ -356,7 +356,11 @@ module.exports = {
     }
 
     if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
-
+    if (options.where && options.idFilter) {
+      select += ' AND ' + options.idFilter
+    } else if (options.idFilter) {
+      select += ' WHERE ' + options.idFilter
+    }
     // parse the geometry param from GeoServices REST
     var box = this._parseGeometry(options.geometry)
     if (box) {

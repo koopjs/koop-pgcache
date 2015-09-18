@@ -347,12 +347,20 @@ module.exports = {
     })
   },
 
-  _buildQuery: function (id, options) {
+  /**
+   * Takes in a table name and a set of options and generates a SQL query
+   *
+   * @param {string} table - the table to query
+   * @param {object} options - a set of options used to build a query
+   * @return {string} select - a generated SQL query
+   * @private
+   */
+  _buildQuery: function (table, options) {
     var select
     if (options.simplify) {
-      select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
+      select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + table + ':' + (options.layer || 0) + '"'
     } else {
-      select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + options.layer + '"'
+      select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + table + ':' + options.layer + '"'
     }
 
     if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)

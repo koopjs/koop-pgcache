@@ -267,7 +267,7 @@ describe('pgCache Model Tests', function () {
     it('should get count', function (done) {
       pgCache.getCount(key + ':0', {}, function (err, count) {
         if (err) throw err
-        count.should.equal(417)
+        count.should.equal(repoData[0].features.length)
         done()
       })
     })

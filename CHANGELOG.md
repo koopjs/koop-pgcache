@@ -12,6 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Select only calls select from the DB, it will return features if available
 * Feature collections are returned as an object instead of as the first object in an array
 * Info can only be retrieved by calling `getInfo`
+* Removed third parameter from _insertFeature as it was not being used for the id
 
 ## [1.3.1] - 2015-09-15 
 ### Fixed

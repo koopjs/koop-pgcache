@@ -540,8 +540,8 @@ module.exports = {
       if (geojson.length) {
         geojson = geojson[0]
       }
-      geojson.features.forEach(function (feature, i) {
-        self._query(self._insertFeature(table, feature, i), function (err) {
+      geojson.features.forEach(function (feature) {
+        self._query(self._insertFeature(table, feature), function (err) {
           if (err) {
             self.log.error(err)
           }
@@ -572,8 +572,8 @@ module.exports = {
     var sql = 'BEGIN;'
     var table = id + ':' + layerId
 
-    geojson.features.forEach(function (feature, i) {
-      sql += self._insertFeature(table, feature, i)
+    geojson.features.forEach(function (feature) {
+      sql += self._insertFeature(table, feature)
     })
     sql += 'COMMIT;'
     this._query(sql, function (err, res) {
@@ -594,15 +594,13 @@ module.exports = {
    *
    * @param {string} table - the table to insert into
    * @param {Object} feature - a geojson feature
-   * @param {string} i - index value to use an id
    * @private
    */
-  _insertFeature: function (table, feature, i) {
+  _insertFeature: function (table, feature) {
     var featurestring = JSON.stringify(feature).replace(/'/g, '')
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
       var geohash = this.createGeohash(feature, this.geohashPrecision)
-      feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
       return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
     } else {
       return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\');'

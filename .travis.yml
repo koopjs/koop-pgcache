@@ -12,7 +12,7 @@ script:
   - npm test
 
 addons:
-  postgresql: "9.4.4"
+  postgresql: "9.4"
 
 before_script:
   - psql -c 'create database koopdev;' -U postgres

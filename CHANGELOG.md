@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Using JSONB instead of JSON
 
+### Fixed
+* Resolved failing builds
+
 ## [1.3.1] - 2015-09-15 
 ### Fixed
 * Insert WKT with proper quote escaping

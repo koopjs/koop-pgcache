@@ -600,7 +600,6 @@ module.exports = {
     var featurestring = JSON.stringify(feature).replace(/'/g, '')
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
-      feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
       var geohash = this.createGeohash(feature, this.geohashPrecision)
       return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
     } else {

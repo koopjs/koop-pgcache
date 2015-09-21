@@ -18,13 +18,6 @@ before(function (done) {
   })
 })
 
-after(function (done) {
-  pgCache._query('drop schema public cascade; create schema public;', function (err, success) {
-    if (err) console.log(err)
-    done()
-  })
-})
-
 describe('pgCache Model Tests', function () {
   describe('when creating DB tables', function () {
     it('create a table w/o erroring', function (done) {

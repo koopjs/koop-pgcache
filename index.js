@@ -62,7 +62,7 @@ module.exports = {
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
@@ -86,14 +86,13 @@ module.exports = {
    */
   getExtent: function (table, options, callback) {
     var self = this
-    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM \"" + table + '"'
+    var select = 'SELECT ST_AsGeoJSON(ST_Extent(geom)) as extent FROM "' + table + '"'
     if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
-
     var box = this._parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
@@ -358,9 +357,9 @@ module.exports = {
   _buildQuery: function (table, options) {
     var select
     if (options.simplify) {
-      select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + table + ':' + (options.layer || 0) + '"'
+      select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(geom, ' + options.simplify + ')) as geom from "' + table + ':' + (options.layer || 0) + '"'
     } else {
-      select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + table + ':' + options.layer + '"'
+      select = 'select id, feature->\'properties\' as props, st_asgeojson(geom) as geom from "' + table + ':' + options.layer + '"'
     }
 
     if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
@@ -374,7 +373,7 @@ module.exports = {
     if (box) {
       select += options.where ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
+      select += 'geom && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
     }
 
     if (options.order_by && options.order_by.length) {
@@ -498,7 +497,7 @@ module.exports = {
     // a list of indexes to create on the new table
     var indexes = [{
       name: 'gix',
-      using: 'GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))'
+      using: 'GIST (geom)'
     }, {
       name: 'substr3',
       using: 'btree (substring(geohash,0,3))'
@@ -600,8 +599,10 @@ module.exports = {
     var featurestring = JSON.stringify(feature).replace(/'/g, '')
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
+      feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
       var geohash = this.createGeohash(feature, this.geohashPrecision)
-      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
+      var geometry = JSON.stringify(feature.geometry)
+      return 'insert into "' + table + '" (feature, geohash, geom) VALUES (\'' + featurestring + '\', \'' + geohash + '\',ST_GeomFromGeoJSON(\'' + geometry + '\'));'
     } else {
       return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\');'
     }
@@ -669,7 +670,7 @@ module.exports = {
    */
   serviceRegister: function (type, info, callback) {
     var self = this
-    this._createTable(type, '(id varchar(100), host varchar)', null, function (err, result) {
+    this._createTable(type, '(id varchar(100), host varchar(100))', null, function (err, result) {
       if (err) {
         callback(err)
       } else {
@@ -826,7 +827,7 @@ module.exports = {
     // parse the geometry into a bbox
     if (box) {
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      options.geomFilter = " ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      options.geomFilter = " geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     // recursively get geohash counts until we have a precision
@@ -969,7 +970,7 @@ module.exports = {
     if (box) {
       sql += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      sql += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      sql += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     if (groupBy) {

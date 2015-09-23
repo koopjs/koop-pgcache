@@ -924,10 +924,11 @@ module.exports = {
     }
     // build sql
     var fieldName
-    if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {
-      fieldName = "(feature->'properties'->>'" + field + "')::float"
+    var numericStats = ['AVG', 'SUM', 'VARIANCE', 'STDDEV', 'MIN', 'MAX', 'COUNT']
+    if (numericStats.indexOf(type.toUpperCase() > -1)) {
+      fieldName = "(feature->'properties'->>'" + field + "')::decimal"
     } else {
-      fieldName = "feature->'properties'->>'" + field + "'"
+      fieldName = "feature->'properties'->'" + field + "'"
     }
     var fieldSql = type.toLowerCase() + '(' + fieldName + ')::float as "' + outName + '\"'
 
@@ -978,9 +979,7 @@ module.exports = {
 
     // issue query
     this._query(sql, function (err, result) {
-      if (err) {
-        return callback(err)
-      }
+      if (err) return callback(err)
       callback(null, result.rows)
     })
   },

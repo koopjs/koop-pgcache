@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Feature collections are returned as an object instead of as the first object in an array
 * Info can only be retrieved by calling `getInfo`
 * Removed third parameter from _insertFeature as it was not being used for the id
+* Casting values to decimal before calling statistic functions
 
 ## [1.3.1] - 2015-09-15 
 ### Fixed

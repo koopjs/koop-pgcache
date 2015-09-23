@@ -978,10 +978,8 @@ module.exports = {
     }
 
     // issue query
-      this._query(sql, function (err, result) {
-      if (err) {
-        return callback(err)
-      }
+    this._query(sql, function (err, result) {
+      if (err) return callback(err)
       callback(null, result.rows)
     })
   },

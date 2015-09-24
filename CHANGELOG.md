@@ -19,7 +19,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 * deleted outdated docs folder (should only be committed to gh-pages)
 
-## [1.3.1] - 2015-09-15 
 ### Fixed
 * Insert WKT with proper quote escaping
 

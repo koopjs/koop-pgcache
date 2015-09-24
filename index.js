@@ -32,8 +32,8 @@ module.exports = {
     this.client = new Pg.Client(conn)
     this.client.connect(function (err) {
       if (err) {
-        console.log('Could not connect to the database: ' + err.message)
-        process.exit()
+        self.log.error('Could not connect to the database: ' + err.message)
+        process.exit(1)
       } else {
         // creates table only if they dont exist
         self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSONB)', null)
@@ -324,7 +324,6 @@ module.exports = {
     var select = self._buildQuery(id, options)
     self.log.debug('Selecting data', select)
     self._query(select, function (err, result) {
-      console.log(select, err)
       if (err) self.log.error(err)
       if (result && result.rows && result.rows.length) {
         var features = []
@@ -1045,9 +1044,11 @@ module.exports = {
    * @private
    */
   _query: function (sql, callback) {
+    var self = this
+
     Pg.connect(this.conn, function (err, client, done) {
       if (err) {
-        return console.error('!error fetching client from pool', err)
+        return self.log.error('error fetching client from pool', err)
       }
       client.query(sql, function (err, result) {
         // call `done()` to release the client back to the pool

@@ -6,7 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
 
-## [1.3.1] - 2015-09-15 
+### Removed
+* deleted outdated docs folder (should only be committed to gh-pages)
+
+## [1.3.1] - 2015-09-15
 ### Fixed
 * Insert WKT with proper quote escaping
 
@@ -14,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * New methods `getWKT` & `insertWKT` for storing and retrieving well known text strings of spatial reference systems
 
-## [1.2.0] - 2015-09-10 
+## [1.2.0] - 2015-09-10
 ### Added
 * order_by option accepts array of {field: order} e.g. {'total_precip': 'ASC'}
 

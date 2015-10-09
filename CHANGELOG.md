@@ -3,13 +3,23 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Added
+* Script to upgrade columns to JSONB
+* Test to ensure success of idFilter
+
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
+* Using JSONB instead of JSON
+* Select only calls select from the DB, it will return features if available
+* Feature collections are returned as an object instead of as the first object in an array
+* Info can only be retrieved by calling `getInfo`
+* Removed third parameter from _insertFeature as it was not being used for the id
+* Casting values to decimal before calling statistic functions
+* Use geometry field for spatial queries to improve speed
 
 ### Removed
 * deleted outdated docs folder (should only be committed to gh-pages)
 
-## [1.3.1] - 2015-09-15
 ### Fixed
 * Insert WKT with proper quote escaping
 
@@ -120,6 +130,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.3.1]: https://github.com/Esri/koop-pgcache/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/Esri/koop-pgcache/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Esri/koop-pgcache/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Esri/koop-pgcache/compare/v1.0.1...v1.1.0

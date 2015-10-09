@@ -32,11 +32,11 @@ module.exports = {
     this.client = new Pg.Client(conn)
     this.client.connect(function (err) {
       if (err) {
-        console.log('Could not connect to the database: ' + err.message)
-        process.exit()
+        self.log.error('Could not connect to the database: ' + err.message)
+        process.exit(1)
       } else {
         // creates table only if they dont exist
-        self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
+        self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSONB)', null)
         self._createTable(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
       }
       if (callback) {
@@ -56,20 +56,13 @@ module.exports = {
   getCount: function (table, options, callback) {
     var self = this
     var select = 'select count(*) as count from "' + table + '"'
-    if (options.where) {
-      if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
-        select += ' WHERE ' + clause
-      } else {
-        select += ' WHERE ' + options.where
-      }
-    }
+    if (options.where) select += ' WHERE ' + self.createWhereFromSql(options.where)
 
-    var box = this.parseGeometry(options.geometry)
+    var box = self._parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
@@ -93,21 +86,13 @@ module.exports = {
    */
   getExtent: function (table, options, callback) {
     var self = this
-    var select = "SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> 'geometry'))) as extent FROM \"" + table + '"'
-    if (options.where) {
-      if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
-        select += ' WHERE ' + clause
-      } else {
-        select += ' WHERE ' + options.where
-      }
-    }
-
-    var box = this.parseGeometry(options.geometry)
+    var select = 'SELECT ST_AsGeoJSON(ST_Extent(geom)) as extent FROM "' + table + '"'
+    if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
+    var box = this._parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     this._query(select, function (err, result) {
@@ -140,7 +125,7 @@ module.exports = {
    * @param {function} callback - returns the info Object
    */
   getInfo: function (table, callback) {
-    this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info\'", function (err, result) {
+    this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
         var error = new Error('Resource not found')
         error.table = table
@@ -161,7 +146,7 @@ module.exports = {
    */
   updateInfo: function (table, info, callback) {
     this.log.debug('Updating info %s %s', table, info.status)
-    this._query('update ' + this.infoTable + ' set info = \'' + JSON.stringify(info) + '\' where id = \'' + table + ':info\'', function (err, result) {
+    this._query('update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'", function (err, result) {
       if (err || !result) {
         var error = new Error('Resource not found')
         error.table = table
@@ -233,7 +218,7 @@ module.exports = {
       value = this.applyCodedDomains(fieldName, value, fields)
     }
 
-    var field = ' (feature->\'properties\'->>\'' + fieldName + '\')'
+    var field = " (feature->'properties'->>'" + fieldName + "')"
 
     if (parseInt(value, 10) || parseInt(value, 10) === 0) {
       if (((parseFloat(value) === parseInt(value, 10)) && !isNaN(value)) || value === 0) {
@@ -243,22 +228,22 @@ module.exports = {
       }
       return field + ' ' + type + ' ' + value
     } else {
-      return field + ' ' + type + ' \'' + value.replace(/'/g, '') + '\''
+      return field + ' ' + type + " '" + value.replace(/'/g, '') + "'"
     }
   },
 
-   /**
-   * Create a "like" filter for query string values
-   *
-   * @param {string} sql - a sql where clause
-   * @param {Array} fields - a list of fields in to support coded value domains
-   */
+  /**
+  * Create a "like" filter for query string values
+  *
+  * @param {string} sql - a sql where clause
+  * @param {Array} fields - a list of fields in to support coded value domains
+  */
   createLikeFilterFromSql: function (sql, fields) {
     var terms = sql.split(' like ')
     if (terms.length !== 2) { return }
 
     // replace N for unicode values so we can rehydrate filter pages
-    var value = terms[1].replace(/^N'/g, '\'') // .replace(/^\'%|%\'$/g, '')
+    var value = terms[1].replace(/^N'/g, "'") // .replace(/^\'%|%\'$/g, '')
     // to support downloads we set quotes on unicode fieldname, here we remove them
     var fieldName = terms[0].replace(/\'([^\']*)'/g, '$1')
 
@@ -267,7 +252,7 @@ module.exports = {
       value = this.applyCodedDomains(fieldName, value, fields)
     }
 
-    var field = ' (feature->\'properties\'->>\'' + fieldName + '\')'
+    var field = " (feature->'properties'->>'" + fieldName + "')"
     return field + ' ilike ' + value
   },
 
@@ -295,6 +280,7 @@ module.exports = {
    * @returns {string} sql
    */
   createWhereFromSql: function (where, fields) {
+    if (where === '1=1') return where
     var self = this
     var terms = where.split(' AND ')
     var andWhere = []
@@ -335,108 +321,72 @@ module.exports = {
    */
   select: function (id, options, callback) {
     var self = this
-    var layer = (options.layer || 0)
-
-    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + '\'', function (err, result) {
-      if (err || !result || !result.rows || !result.rows.length) {
-        callback(new Error('Resource not found'), [])
-      } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
-        callback(null, [{ status: 'processing' }])
-      } else {
-        var info = result.rows[0].info
-        var select
-        if (options.simplify) {
-          select = 'select id, feature->\'properties\' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->\'geometry\'), ' + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
-        } else {
-          select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + layer + '"'
-        }
-
-        // parse the where clause
-        if (options.where) {
-          if (options.where !== '1=1') {
-            var clause = self.createWhereFromSql(options.where, options.fields)
-            select += ' WHERE ' + clause
-          } else {
-            select += ' WHERE ' + options.where
-          }
-          if (options.idFilter) {
-            select += ' AND ' + options.idFilter
-          }
-        } else if (options.idFilter) {
-          select += ' WHERE ' + options.idFilter
-        }
-
-        // parse the geometry param from GeoServices REST
-        var box = self.parseGeometry(options.geometry)
-        if (box) {
-          select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
-          var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-          select += 'ST_GeomFromGeoJSON(feature->>\'geometry\') && ST_SetSRID(\'BOX3D(' + bbox + ')\'::box3d,4326)'
-        }
-
-        // TODO don't do a count here, limits shouldn't be set at the DB level
-        self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
-          if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
-            callback(null, [{
-              exceeds_limit: true,
-              type: 'FeatureCollection',
-              features: [{}],
-              name: info.name,
-              sha: info.sha,
-              info: info.info,
-              updated_at: info.updated_at,
-              retrieved_at: info.retrieved_at,
-              expires_at: info.expires_at,
-              count: result.rows[0].count
-            }])
-          } else {
-            if (options.order_by && options.order_by.length) {
-              select += ' ' + self._buildSort(options.order_by)
-            } else {
-              select += ' ORDER BY id'
-            }
-            if (options.limit) {
-              select += ' LIMIT ' + options.limit
-            }
-            if (options.offset) {
-              select += ' OFFSET ' + options.offset
-            }
-            self.log.debug('Selecting data', select)
-            self._query(select, function (err, result) {
-              if (err) self.log.error(err)
-              if (result && result.rows && result.rows.length) {
-                var features = []
-                  // feature
-                result.rows.forEach(function (row, i) {
-                  features.push({
-                    'type': 'Feature',
-                    'id': row.id,
-                    'geometry': row.geom,
-                    'properties': row.props
-                  })
-                })
-                callback(null, [{
-                  type: 'FeatureCollection',
-                  features: features,
-                  name: info.name,
-                  sha: info.sha,
-                  info: info.info,
-                  updated_at: info.updated_at,
-                  retrieved_at: info.retrieved_at,
-                  expires_at: info.expires_at,
-                  count: result.rows.length
-                }])
-              } else {
-                callback('Not Found', [{
-                  type: 'FeatureCollection',
-                  features: []
-                }])
-              }
-            })
-          }
+    var select = self._buildQuery(id, options)
+    self.log.debug('Selecting data', select)
+    self._query(select, function (err, result) {
+      if (err) self.log.error(err)
+      if (result && result.rows && result.rows.length) {
+        var features = []
+        result.rows.forEach(function (row, i) {
+          features.push({
+            'type': 'Feature',
+            'id': row.id,
+            'geometry': row.geom,
+            'properties': row.props
+          })
         })
+
+        callback(null, {
+          type: 'FeatureCollection',
+          features: features
+        })
+      } else {
+        callback(new Error('Resource not found'))
       }
     })
+  },
+
+  /**
+   * Takes in a table name and a set of options and generates a SQL query
+   *
+   * @param {string} table - the table to query
+   * @param {object} options - a set of options used to build a query
+   * @return {string} select - a generated SQL query
+   * @private
+   */
+  _buildQuery: function (table, options) {
+    var select
+    if (options.simplify) {
+      select = "select id, feature->'properties' as props, st_asgeojson(ST_SimplifyPreserveTopology(geom, " + options.simplify + ')) as geom from "' + table + ':' + (options.layer || 0) + '"'
+    } else {
+      select = 'select id, feature->\'properties\' as props, st_asgeojson(geom) as geom from "' + table + ':' + options.layer + '"'
+    }
+
+    if (options.where) select += ' WHERE ' + this.createWhereFromSql(options.where)
+    if (options.where && options.idFilter) {
+      select += ' AND ' + options.idFilter
+    } else if (options.idFilter) {
+      select += ' WHERE ' + options.idFilter
+    }
+    // parse the geometry param from GeoServices REST
+    var box = this._parseGeometry(options.geometry)
+    if (box) {
+      select += options.where ? ' AND ' : ' WHERE '
+      var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
+      select += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+    }
+
+    if (options.order_by && options.order_by.length) {
+      select += ' ' + this._buildSort(options.order_by)
+    } else {
+      select += ' ORDER BY id'
+    }
+
+    if (options.limit) select += ' LIMIT ' + options.limit
+
+    if (options.offset) select += ' OFFSET ' + options.offset
+
+    return select
   },
 
   /**
@@ -445,7 +395,7 @@ module.exports = {
    *
    * @param {string} geometry - a geometry used for filtering data spatially
    */
-  parseGeometry: function (geometry) {
+  _parseGeometry: function (geometry) {
     var bbox = { spatialReference: {wkid: 4326} }
     var geom
 
@@ -486,7 +436,7 @@ module.exports = {
     }
     // check to make sure everything is numeric
     if (this.isNumeric(bbox.xmin) && this.isNumeric(bbox.xmax) &&
-        this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {
+      this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {
       return bbox
     } else {
       return false
@@ -503,13 +453,13 @@ module.exports = {
     var order = 'ORDER BY '
     sorts.forEach(function (field) {
       var name = Object.keys(field)[0]
-      order += 'feature->\'properties\'->>\'' + name + '\' ' + field[name] + ', '
+      order += "feature->'properties'->'" + name + "' " + field[name] + ', '
     })
     return order.slice(0, -2)
   },
 
   /**
-   * Creates a table and inserts features and metadat
+   * Creates a table and inserts features and metadata
    * creates indexes for each property in the features and substring indexes on geohashes
    *
    * @param {string} id - the dataset id to insert into
@@ -541,13 +491,13 @@ module.exports = {
     }
 
     if (!feature) {
-      feature = { geometry: { type: geojson.geomType || types[geojson.info.geometryType] } }
+      feature = {geometry: {type: geojson.geomType || types[geojson.info.geometryType]}}
     }
 
     // a list of indexes to create on the new table
     var indexes = [{
       name: 'gix',
-      using: 'GIST (ST_GeomfromGeoJSON(feature->>\'geometry\'))'
+      using: 'GIST (geom)'
     }, {
       name: 'substr3',
       using: 'btree (substring(geohash,0,3))'
@@ -573,13 +523,13 @@ module.exports = {
       geojson.info.fields.forEach(function (field) {
         var idx = {
           name: field,
-          using: 'btree ((feature->\'properties\'->>\'' + field + '\'))'
+          using: "btree ((feature->'properties'->>'" + field + "'))"
         }
         indexes.push(idx)
       })
     }
-
-    self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
+    var schema = '(id SERIAL PRIMARY KEY, feature JSONB, geom Geometry, geohash varchar(10))'
+    self._createTable(table, schema, indexes, function (err) {
       if (err) {
         callback(err, false)
         return
@@ -598,9 +548,9 @@ module.exports = {
       })
 
       // TODO Why not use an update query here?
-      self._query('delete from "' + self.infoTable + '" where id=\'' + table + ':info\'', function (err, res) {
+      self._query('delete from "' + self.infoTable + '" where id=\'' + table + ":info'", function (err, res) {
         if (err) self.log.error(err)
-        self._query('insert into "' + self.infoTable + '" values (\'' + table + ':info\',\'' + JSON.stringify(info).replace(/'/g, '') + '\')', function (err, result) {
+        self._query('insert into "' + self.infoTable + '" values (\'' + table + ":info','" + JSON.stringify(info).replace(/'/g, '') + "')", function (err, result) {
           callback(err, true)
         })
       })
@@ -650,9 +600,11 @@ module.exports = {
 
     if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
       var geohash = this.createGeohash(feature, this.geohashPrecision)
-      return 'insert into "' + table + '" (feature, geohash) VALUES (\'' + featurestring + '\', \'' + geohash + '\');'
+      feature.geometry.crs = {'type': 'name', 'properties': {'name': 'EPSG:4326'}}
+      var geometry = JSON.stringify(feature.geometry)
+      return 'insert into "' + table + '" (feature, geohash, geom) VALUES (\'' + featurestring + "', '" + geohash + "',ST_GeomFromGeoJSON('" + geometry + "'));"
     } else {
-      return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + '\');'
+      return 'insert into "' + table + '" (feature) VALUES (\'' + featurestring + "');"
     }
   },
 
@@ -683,7 +635,7 @@ module.exports = {
    */
   remove: function (id, callback) {
     var self = this
-    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':info') + '\'', function (err, result) {
+    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
       if (err) self.log.error(err)
       if (!result || !result.rows.length) {
         // nothing to remove
@@ -691,7 +643,7 @@ module.exports = {
       } else {
         self.dropTable(id, function (err, result) {
           if (err) self.log.error(err)
-          self._query('delete from "' + self.infoTable + '" where id=\'' + (id + ':info') + '\'', function (err, result) {
+          self._query('delete from "' + self.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
             if (callback) callback(err, true)
           })
         })
@@ -722,9 +674,9 @@ module.exports = {
       if (err) {
         callback(err)
       } else {
-        self._query('select * from "' + type + '" where id=\'' + info.id + "\'", function (err, res) {
+        self._query('select * from "' + type + '" where id=\'' + info.id + "'", function (err, res) {
           if (err || !res || !res.rows || !res.rows.length) {
-            var sql = 'insert into "' + type + '" (id, host) VALUES (\'' + info.id + '\', \'' + info.host + '\')'
+            var sql = 'insert into "' + type + '" (id, host) VALUES (\'' + info.id + "', '" + info.host + "')"
             self._query(sql, function (err, res) {
               callback(err, true)
             })
@@ -784,7 +736,7 @@ module.exports = {
         callback(err, (res) ? res.rows : null)
       })
     } else {
-      sql = 'select * from "' + type + '" where id=\'' + id + "\'"
+      sql = 'select * from "' + type + '" where id=\'' + id + "'"
       self._query(sql, function (err, res) {
         if (err || !res || !res.rows || !res.rows.length) {
           var error = new Error('Resource not found')
@@ -808,11 +760,11 @@ module.exports = {
     var self = this
     var now = new Date()
     var expires_at = new Date(now.getTime() + expires)
-    this._query('delete from "' + this.timerTable + '" WHERE id=\'' + key + "\'", function (err, res) {
+    this._query('delete from "' + this.timerTable + '" WHERE id=\'' + key + "'", function (err, res) {
       if (err) {
         callback(err)
       } else {
-        self._query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + '\', \'' + expires_at.getTime() + '\')', function (err, res) {
+        self._query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + "', '" + expires_at.getTime() + "')", function (err, res) {
           callback(err, res)
         })
       }
@@ -827,7 +779,7 @@ module.exports = {
    * @param {function} callback - the callback when the query returns
    */
   timerGet: function (table, callback) {
-    this._query('select * from "' + this.timerTable + '" where id=\'' + table + '\'', function (err, res) {
+    this._query('select * from "' + this.timerTable + '" where id=\'' + table + "'", function (err, res) {
       if (err || !res || !res.rows || !res.rows.length) {
         callback(err, null)
       } else {
@@ -871,11 +823,11 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = this._parseGeometry(options.geometry)
     // parse the geometry into a bbox
     if (box) {
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      options.geomFilter = " ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      options.geomFilter = " geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     // recursively get geohash counts until we have a precision
@@ -973,12 +925,13 @@ module.exports = {
     }
     // build sql
     var fieldName
-    if (type === 'avg' || type === 'sum' || type === 'variance' || type === 'stddev') {
-      fieldName = "(feature->'properties'->>'" + field + "')::float"
+    var numericStats = ['AVG', 'SUM', 'VARIANCE', 'STDDEV', 'MIN', 'MAX', 'COUNT']
+    if (numericStats.indexOf(type.toUpperCase() > -1)) {
+      fieldName = "(feature->'properties'->>'" + field + "')::decimal"
     } else {
-      fieldName = "feature->'properties'->>'" + field + "'"
+      fieldName = "feature->'properties'->'" + field + "'"
     }
-    var fieldSql = type.toLowerCase() + '(' + fieldName + ')::float as "' + outName + '\"'
+    var fieldSql = type.toLowerCase() + '(' + fieldName + ')::float as "' + outName + '"'
 
     // add groupby
     var groupByAs, groupBy
@@ -1014,11 +967,11 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = this._parseGeometry(options.geometry)
     if (box) {
       sql += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      sql += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
+      sql += "geom && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
     if (groupBy) {
@@ -1027,9 +980,7 @@ module.exports = {
 
     // issue query
     this._query(sql, function (err, result) {
-      if (err) {
-        return callback(err)
-      }
+      if (err) return callback(err)
       callback(null, result.rows)
     })
   },
@@ -1093,9 +1044,11 @@ module.exports = {
    * @private
    */
   _query: function (sql, callback) {
+    var self = this
+
     Pg.connect(this.conn, function (err, client, done) {
       if (err) {
-        return console.error('!error fetching client from pool', err)
+        return self.log.error('error fetching client from pool', err)
       }
       client.query(sql, function (err, result) {
         // call `done()` to release the client back to the pool
@@ -1135,7 +1088,7 @@ module.exports = {
    */
   _createTable: function (name, schema, indexes, callback) {
     var self = this
-    var sql = 'select exists(select * from information_schema.tables where table_name=\'' + name + '\')'
+    var sql = "select exists(select * from information_schema.tables where table_name='" + name + "')"
     this._query(sql, function (err, result) {
       if (err) {
         callback('Failed to create table ' + name)
@@ -1174,26 +1127,5 @@ module.exports = {
         }
       }
     })
-  },
-
-  /**
-   * Builds a table schema from a geojson feature
-   * each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here
-   *
-   * @param {Object} feature - a geojson feature   * @returns {string} schema
-   * @private
-   */
-  _buildSchemaFromFeature: function (feature) {
-    var schema = '('
-    var type
-    if (feature && feature.geometry && feature.geometry.type) {
-      type = feature.geometry.type.toUpperCase()
-    } else {
-      // default to point geoms
-      type = 'POINT'
-    }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
-    schema += props.join(',') + ')'
-    return schema
   }
 }

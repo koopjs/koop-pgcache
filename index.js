@@ -4,6 +4,7 @@ var centroid = require('turf-centroid')
 var SM = require('sphericalmercator')
 var merc = new SM({ size: 256 })
 var pkg = require('./package')
+var _ = require('lodash')
 
 module.exports = {
   type: 'cache',
@@ -519,7 +520,10 @@ module.exports = {
    */
   insert: function (id, geojson, layerId, callback) {
     var self = this
-    var info = {}
+
+    var info = _.cloneDeep(geojson.info) || {}
+    // DEPRECATED: to be removed in 2.0
+    info.info = geojson.info
 
     info.name = geojson.name
     info.updated_at = geojson.updated_at
@@ -528,7 +532,6 @@ module.exports = {
     info.status = geojson.status
     info.format = geojson.format
     info.sha = geojson.sha
-    info.info = geojson.info
     info.host = geojson.host
 
     var table = id + ':' + layerId

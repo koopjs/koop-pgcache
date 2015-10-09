@@ -5,6 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
+* Info passed in with geojson is stored as a flat object
+
+### Deprecated
+* Info passed in with geojson is no longer stored in the info doc as info.info
 
 ### Removed
 * deleted outdated docs folder (should only be committed to gh-pages)

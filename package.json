@@ -7,6 +7,7 @@
     "url": "https://github.com/koopjs/koop-pgcache/issues"
   },
   "dependencies": {
+    "lodash": "^3.10.1",
     "ngeohash": "^0.6.0",
     "pg": "^4.2.0",
     "sphericalmercator": "^1.0.3",

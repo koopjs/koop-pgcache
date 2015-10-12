@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
+### Fixed
+* Aborted transactions are ended
+* Cleaned up some broken docs 
+
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
 * Info passed in with geojson is stored as a flat object

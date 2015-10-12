@@ -571,9 +571,12 @@ module.exports = {
       using: 'btree (substring(geohash,0,8))'
     }]
 
+    // in 2.0 we can pass in an option to decide whether to index fields, for now we will just use info
+    // default to true so there is no breaking change
+    if (typeof info._indexFields === 'undefined') info._indexFields = true
     // for each property in the data create an index
-    if (geojson.info && geojson.info.fields) {
-      geojson.info.fields.forEach(function (field) {
+    if (info && info.fields && info._indexFields) {
+      info.fields.forEach(function (field) {
         var idx = {
           name: field,
           using: 'btree ((feature->\'properties\'->>\'' + field + '\'))'

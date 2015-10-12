@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id
 * Info passed in with geojson is stored as a flat object
+* Indices set for each field can be turned off at insert time
 
 ### Deprecated
 * Info passed in with geojson is no longer stored in the info doc as info.info

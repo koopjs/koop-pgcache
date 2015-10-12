@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.4.0] - 2015-10-12
 ### Fixed
 * Aborted transactions are ended
 * Cleaned up some broken docs 
@@ -129,6 +129,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.4.0]: https://github.com/Esri/koop-pgcache/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/Esri/koop-pgcache/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Esri/koop-pgcache/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Esri/koop-pgcache/compare/v1.0.1...v1.1.0

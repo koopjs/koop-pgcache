@@ -680,7 +680,7 @@ module.exports = {
 
   /**
    * Removes everything in the DB for a given idea
-   * will delete all metadata, timers, and features   *
+   * will delete all metadata, timers, and features
    * @param {string} id - the dataset id to remove
    * @param {function} callback - the callback when the query returns
    */
@@ -824,7 +824,8 @@ module.exports = {
 
   /**
    * Gets the current timer for a given table
-   * timers are used throttle API calls by preventing providers from   * over-calling an API.
+   * timers are used throttle API calls by preventing providers from
+   * over-calling an API.
    *
    * @param {string} table - the table to query
    * @param {function} callback - the callback when the query returns
@@ -849,7 +850,8 @@ module.exports = {
 
   /**
    * Get a geohash aggregation for a set of features in the db
-   * this will auto-reduce the precision of the geohashes if the given   * precision exceeds the given limit.
+   * this will auto-reduce the precision of the geohashes if the given
+   * precision exceeds the given limit.
    *
    * @param {string} table - the table to query
    * @param {number} limit - the max number of geohash to send back
@@ -1088,32 +1090,47 @@ module.exports = {
   // ---------------
 
   /**
-   * Executes SQL again the DB
+   * Executes SQL against the DB
    * uses connection pooling to connect and query
    *
    * @param {string} sql - the sql to run
    * @param {function} callback - the callback when db returns
+   * @param {boolean} retried - whether this query is being retried after an aborted transaction
    * @private
    */
-  _query: function (sql, callback) {
-    Pg.connect(this.conn, function (err, client, done) {
-      if (err) {
-        return console.error('!error fetching client from pool', err)
+  _query: function (sql, callback, retried) {
+    var self = this
+
+    Pg.connect(this.conn, function (error, client, done) {
+      if (error) {
+        self.log.error('error fetching client from pool', error)
+        return callback(error)
       }
       client.query(sql, function (err, result) {
+        // this error occurs when we have an aborted transaction
+        // we'll try to clear that transaction
+        if (err && err.code === '25P02' && !retried) return handleBrokenTransaction(client, done)
         // call `done()` to release the client back to the pool
         done()
-        if (callback) {
-          callback(err, result)
-        }
+        if (callback) callback(err, result)
       })
     })
+
+    function handleBrokenTransaction (client, done) {
+      client.query('END;', function (err, result) {
+        done()
+        if (err && callback) return callback(err)
+        // call _query recursively but only once
+        self._query(sql, callback, true)
+      })
+    }
   },
 
   /**
-   * Creates an index on a given table   *
+   * Creates an index on a given table
    * @param {string} table - the table to index
-   * @param {string} name - the name of the index    * @param {string} using - the actual field and type of the index
+   * @param {string} name - the name of the index
+   * @param {string} using - the actual field and type of the index
    * @param {function} callback - the callback when the query returns
    * @private
    */
@@ -1132,7 +1149,9 @@ module.exports = {
    * Creates a new table
    * checks to see if the table exists, create it if not
    *
-   * @param {string} name - the name of the index    * @param {string} schema - the schema to use for the table   * @param {Array} indexes - an array of indexes to place on the table
+   * @param {string} name - the name of the index
+   * @param {string} schema - the schema to use for the table
+   * @param {Array} indexes - an array of indexes to place on the table
    * @param {function} callback - the callback when the query returns
    * @private
    */
@@ -1181,7 +1200,8 @@ module.exports = {
 
   /**
    * Builds a table schema from a geojson feature
-   * each schema in the db is essentially the same except for geometry type   * which is based off the geometry of the feature passed in here
+   * each schema in the db is essentially the same except for geometry type
+   * which is based off the geometry of the feature passed in here
    *
    * @param {Object} feature - a geojson feature   * @returns {string} schema
    * @private

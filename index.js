@@ -405,9 +405,8 @@ module.exports = {
             self.log.debug('Selecting data', select)
             self._query(select, function (err, result) {
               if (err) self.log.error(err)
+              var features = []
               if (result && result.rows && result.rows.length) {
-                var features = []
-                  // feature
                 result.rows.forEach(function (row, i) {
                   features.push({
                     'type': 'Feature',
@@ -416,23 +415,18 @@ module.exports = {
                     'properties': row.props
                   })
                 })
-                callback(null, [{
-                  type: 'FeatureCollection',
-                  features: features,
-                  name: info.name,
-                  sha: info.sha,
-                  info: info.info,
-                  updated_at: info.updated_at,
-                  retrieved_at: info.retrieved_at,
-                  expires_at: info.expires_at,
-                  count: result.rows.length
-                }])
-              } else {
-                callback('Not Found', [{
-                  type: 'FeatureCollection',
-                  features: []
-                }])
               }
+              callback(null, [{
+                type: 'FeatureCollection',
+                features: features,
+                name: info.name,
+                sha: info.sha,
+                info: info.info,
+                updated_at: info.updated_at,
+                retrieved_at: info.retrieved_at,
+                expires_at: info.expires_at,
+                count: result.rows.length
+              }])
             })
           }
         })

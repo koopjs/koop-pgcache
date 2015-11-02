@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Don't call back with 'Not Found' in the error field when a specific query is empty
+
 ## [1.4.0] - 2015-10-12
 ### Fixed
 * Aborted transactions are ended

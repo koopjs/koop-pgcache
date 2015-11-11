@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Remove two potential causes of unhandled exceptions in `select`
+
 ## [1.4.1] - 2015-11-2
 ### Fixed
 * Don't call back with 'Not Found' in the error field when a specific query is empty
@@ -9,7 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.4.0] - 2015-10-12
 ### Fixed
 * Aborted transactions are ended
-* Cleaned up some broken docs 
+* Cleaned up some broken docs
 
 ### Changed
 * Removed third parameter from _insertFeature as it was not being used for the id

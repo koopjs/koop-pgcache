@@ -2,11 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.4.2] - 2015-11-11
 ### Fixed
 * Remove two potential causes of unhandled exceptions in `select`
 
-## [1.4.1] - 2015-11-2
+## [1.4.1] - 2015-11-02
 ### Fixed
 * Don't call back with 'Not Found' in the error field when a specific query is empty
 
@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Cleaned up some broken docs
 
 ### Changed
-* Removed third parameter from _insertFeature as it was not being used for the id
+* Removed third parameter from `_insertFeature` as it was not being used for the id
 * Info passed in with geojson is stored as a flat object
 * Indices set for each field can be turned off at insert time
 
@@ -137,6 +137,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.4.2]: https://github.com/Esri/koop-pgcache/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/Esri/koop-pgcache/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/Esri/koop-pgcache/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/Esri/koop-pgcache/compare/v1.2.0...v1.3.0

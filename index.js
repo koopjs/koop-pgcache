@@ -377,10 +377,6 @@ module.exports = {
 
         // TODO don't do a count here, limits shouldn't be set at the DB level
         self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
-          if (err) {
-            self.log.error(err)
-            return callback(err)
-          }
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
             callback(null, [{
               exceeds_limit: true,
@@ -408,10 +404,7 @@ module.exports = {
             }
             self.log.debug('Selecting data', select)
             self._query(select, function (err, result) {
-              if (err) {
-                self.log.error(err)
-                return callback(err)
-              }
+              if (err) self.log.error(err)
               var features = []
               if (result && result.rows && result.rows.length) {
                 result.rows.forEach(function (row, i) {
@@ -1113,12 +1106,25 @@ module.exports = {
       client.query(sql, function (err, result) {
         // this error occurs when we have an aborted transaction
         // we'll try to clear that transaction
-        if (err && err.code === '25P02' && !retried) return handleBrokenTransaction(client, done)
+        if (err) {
+          if (err.code === '25P02' && !retried) return handleBrokenTransaction(client, done)
+          logQueryError(err)
+        }
         // call `done()` to release the client back to the pool
         done()
         if (callback) callback(err, result)
       })
     })
+
+    function logQueryError (err) {
+      err.msg = err.message
+      self.log.error('Error querying', truncateSql(sql), JSON.stringify(err))
+    }
+
+    function truncateSql (sql) {
+      if (sql.length < 26) return sql
+      return sql.slice(0, 25) + '...'
+    }
 
     function handleBrokenTransaction (client, done) {
       client.query('END;', function (err, result) {

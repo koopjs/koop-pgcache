@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* Log full error object in case of query failure
+
 ## [1.4.2] - 2015-11-11
 ### Fixed
 * Remove two potential causes of unhandled exceptions in `select`

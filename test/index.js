@@ -18,6 +18,13 @@ before(function (done) {
   })
 })
 
+after(function (done) {
+  pgCache._query('BEGIN;drop schema public cascade;create schema public; create extension postgis;COMMIT;', function (err, res) {
+    if (err) console.error(err)
+    done()
+  })
+})
+
 describe('pgCache Model Tests', function () {
   describe('when creating DB tables', function () {
     it('create a table w/o erroring', function (done) {

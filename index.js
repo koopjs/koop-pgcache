@@ -5,6 +5,7 @@ var SM = require('sphericalmercator')
 var merc = new SM({ size: 256 })
 var pkg = require('./package')
 var _ = require('lodash')
+var Indexing = require('./lib/indexing')
 
 module.exports = {
   type: 'cache',
@@ -44,6 +45,8 @@ module.exports = {
         callback()
       }
     })
+    // Inject query where needed
+    Indexing.query = this.query.bind(this)
     return this
   },
 
@@ -73,7 +76,7 @@ module.exports = {
       select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
-    this._query(select, function (err, result) {
+    this.query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
         var error = new Error('Resource not found')
         error.table = table
@@ -111,7 +114,7 @@ module.exports = {
       select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
     }
 
-    this._query(select, function (err, result) {
+    this.query(select, function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
         var error = new Error('Resource not found')
         error.table = table
@@ -141,7 +144,7 @@ module.exports = {
    * @param {function} callback - returns the info Object
    */
   getInfo: function (table, callback) {
-    this._query('select info from "' + this.infoTable + '" where id=\'' + table + ":info'", function (err, result) {
+    this.query('select info from "' + this.infoTable + '" where id=\'' + table + ":info'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
         var error = new Error('Resource not found')
         error.table = table
@@ -162,7 +165,7 @@ module.exports = {
    */
   updateInfo: function (table, info, callback) {
     this.log.debug('Updating info %s %s', table, info.status)
-    this._query('update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'", function (err, result) {
+    this.query('update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'", function (err, result) {
       if (err || !result) {
         var error = new Error('Resource not found')
         error.table = table
@@ -338,7 +341,7 @@ module.exports = {
     var self = this
     var layer = (options.layer || 0)
 
-    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + "'", function (err, result) {
+    this.query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + "'", function (err, result) {
       if (err || !result || !result.rows || !result.rows.length) {
         callback(new Error('Resource not found'), [])
       } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
@@ -376,7 +379,7 @@ module.exports = {
         }
 
         // TODO don't do a count here, limits shouldn't be set at the DB level
-        self._query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
+        self.query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
           if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
             callback(null, [{
               exceeds_limit: true,
@@ -403,7 +406,7 @@ module.exports = {
               select += ' OFFSET ' + options.offset
             }
             self.log.debug('Selecting data', select)
-            self._query(select, function (err, result) {
+            self.query(select, function (err, result) {
               if (err) self.log.error(err)
               var features = []
               if (result && result.rows && result.rows.length) {
@@ -541,43 +544,7 @@ module.exports = {
       feature = { geometry: { type: geojson.geomType || types[geojson.info.geometryType] } }
     }
 
-    // a list of indexes to create on the new table
-    var indexes = [{
-      name: 'gix',
-      using: "GIST (ST_GeomfromGeoJSON(feature->>'geometry'))"
-    }, {
-      name: 'substr3',
-      using: 'btree (substring(geohash,0,3))'
-    }, {
-      name: 'substr4',
-      using: 'btree (substring(geohash,0,4))'
-    }, {
-      name: 'substr5',
-      using: 'btree (substring(geohash,0,5))'
-    }, {
-      name: 'substr6',
-      using: 'btree (substring(geohash,0,6))'
-    }, {
-      name: 'substr7',
-      using: 'btree (substring(geohash,0,7))'
-    }, {
-      name: 'substr8',
-      using: 'btree (substring(geohash,0,8))'
-    }]
-
-    // in 2.0 we can pass in an option to decide whether to index fields, for now we will just use info
-    // default to true so there is no breaking change
-    if (typeof info._indexFields === 'undefined') info._indexFields = true
-    // for each property in the data create an index
-    if (info && info.fields && info._indexFields) {
-      info.fields.forEach(function (field) {
-        var idx = {
-          name: field,
-          using: "btree ((feature->'properties'->>'" + field + "'))"
-        }
-        indexes.push(idx)
-      })
-    }
+    var indexes = Indexing.prepareIndexes(info)
 
     self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
       if (err) {
@@ -591,9 +558,9 @@ module.exports = {
       }
 
       // TODO why not use an update query here?
-      self._query('delete from "' + self.infoTable + '" where id=\'' + table + ":info'", function (err, res) {
+      self.query('delete from "' + self.infoTable + '" where id=\'' + table + ":info'", function (err, res) {
         if (err) self.log.error(err)
-        self._query('insert into "' + self.infoTable + '" values (\'' + table + ":info','" + JSON.stringify(info).replace(/'/g, '') + "')", function (err, result) {
+        self.query('insert into "' + self.infoTable + '" values (\'' + table + ":info','" + JSON.stringify(info).replace(/'/g, '') + "')", function (err, result) {
           if (!geojson.features.length) return callback(err, true)
           self.insertPartial(id, geojson, layerId, function (err) {
             callback(err, true)
@@ -621,10 +588,10 @@ module.exports = {
     })
     sql = sql.slice(0, -1)
     sql += ';COMMIT;'
-    this._query(sql, function (err, res) {
+    this.query(sql, function (err, res) {
       if (err) {
         self.log.error('insert partial ERROR %s, %s', err, id)
-        self._query('ROLLBACK;', function () {
+        self.query('ROLLBACK;', function () {
           callback(err, false)
         })
       } else {
@@ -651,6 +618,11 @@ module.exports = {
       return "('" + featurestring + "')"
     }
   },
+
+ /**
+  * Simple wrapper to give acess to the indexing module
+  */
+  addIndexes: Indexing.addIndexes,
 
   /**
    * Creates a geohash from a features
@@ -679,7 +651,7 @@ module.exports = {
    */
   remove: function (id, callback) {
     var self = this
-    this._query('select info from "' + this.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
+    this.query('select info from "' + this.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
       if (err) self.log.error(err)
       if (!result || !result.rows.length) {
         // nothing to remove
@@ -687,7 +659,7 @@ module.exports = {
       } else {
         self.dropTable(id, function (err, result) {
           if (err) self.log.error(err)
-          self._query('delete from "' + self.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
+          self.query('delete from "' + self.infoTable + '" where id=\'' + (id + ':info') + "'", function (err, result) {
             if (callback) callback(err, true)
           })
         })
@@ -702,7 +674,7 @@ module.exports = {
    * @param {function} callback - the callback when the query returns
    */
   dropTable: function (table, callback) {
-    this._query('drop table "' + table + '"', callback)
+    this.query('drop table "' + table + '"', callback)
   },
 
   /**
@@ -718,10 +690,10 @@ module.exports = {
       if (err) {
         callback(err)
       } else {
-        self._query('select * from "' + type + '" where id=\'' + info.id + "'", function (err, res) {
+        self.query('select * from "' + type + '" where id=\'' + info.id + "'", function (err, res) {
           if (err || !res || !res.rows || !res.rows.length) {
             var sql = 'insert into "' + type + '" (id, host) VALUES (\'' + info.id + "', '" + info.host + "')"
-            self._query(sql, function (err, res) {
+            self.query(sql, function (err, res) {
               callback(err, true)
             })
           } else {
@@ -740,7 +712,7 @@ module.exports = {
    */
   serviceCount: function (type, callback) {
     var sql = 'select count(*) as count from "' + type + '"'
-    this._query(sql, function (err, res) {
+    this.query(sql, function (err, res) {
       if (err || !res || !res.rows || !res.rows.length) {
         callback(err, 0)
       } else {
@@ -758,7 +730,7 @@ module.exports = {
    */
   serviceRemove: function (type, id, callback) {
     var sql = 'delete from "' + type + '" where id=\'' + id + "'"
-    this._query(sql, function (err, res) {
+    this.query(sql, function (err, res) {
       callback(err, true)
     })
   },
@@ -776,12 +748,12 @@ module.exports = {
     var sql
     if (!id) {
       sql = 'select * from "' + type + '"'
-      self._query(sql, function (err, res) {
+      self.query(sql, function (err, res) {
         callback(err, (res) ? res.rows : null)
       })
     } else {
       sql = 'select * from "' + type + '" where id=\'' + id + "'"
-      self._query(sql, function (err, res) {
+      self.query(sql, function (err, res) {
         if (err || !res || !res.rows || !res.rows.length) {
           var error = new Error('Resource not found')
           error.id = id
@@ -804,11 +776,11 @@ module.exports = {
     var self = this
     var now = new Date()
     var expires_at = new Date(now.getTime() + expires)
-    this._query('delete from "' + this.timerTable + '" WHERE id=\'' + key + "'", function (err, res) {
+    this.query('delete from "' + this.timerTable + '" WHERE id=\'' + key + "'", function (err, res) {
       if (err) {
         callback(err)
       } else {
-        self._query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + "', '" + expires_at.getTime() + "')", function (err, res) {
+        self.query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + "', '" + expires_at.getTime() + "')", function (err, res) {
           callback(err, res)
         })
       }
@@ -824,7 +796,7 @@ module.exports = {
    * @param {function} callback - the callback when the query returns
    */
   timerGet: function (table, callback) {
-    this._query('select * from "' + this.timerTable + '" where id=\'' + table + "'", function (err, res) {
+    this.query('select * from "' + this.timerTable + '" where id=\'' + table + "'", function (err, res) {
       if (err || !res || !res.rows || !res.rows.length) {
         callback(err, null)
       } else {
@@ -915,7 +887,7 @@ module.exports = {
 
       sql += ' GROUP BY ' + geoHashSelect
       self.log.info('GEOHASH Query', sql)
-      self._query(sql, function (err, res) {
+      self.query(sql, function (err, res) {
         if (!err && res && res.rows.length) {
           res.rows.forEach(function (row) {
             agg[row.geohash] = row.count
@@ -948,7 +920,7 @@ module.exports = {
     }
 
     this.log.debug(countSql)
-    this._query(countSql, function (err, res) {
+    this.query(countSql, function (err, res) {
       if (err) return callback(err, null)
       callback(null, res.rows[0].count)
     })
@@ -1024,7 +996,7 @@ module.exports = {
     }
 
     // issue query
-    this._query(sql, function (err, result) {
+    this.query(sql, function (err, result) {
       if (err) {
         return callback(err)
       }
@@ -1041,7 +1013,7 @@ module.exports = {
   getWKT: function (srid, callback) {
     var self = this
     var sql = 'SELECT srtext FROM spatial_ref_sys WHERE srid=' + srid + ';'
-    self._query(sql, function (err, result) {
+    self.query(sql, function (err, result) {
       if (err) return callback(err)
       var wkt
       try {
@@ -1072,7 +1044,7 @@ module.exports = {
    */
   insertWKT: function (srid, wkt, callback) {
     var sql = 'INSERT INTO spatial_ref_sys (srid, srtext) VALUES (' + [srid, "'" + wkt + "'"].join(',') + ');'
-    this._query(sql, function (err, result) {
+    this.query(sql, function (err, result) {
       if (err) return callback(err)
       callback(null, result)
     })
@@ -1091,7 +1063,7 @@ module.exports = {
    * @param {boolean} retried - whether this query is being retried after an aborted transaction
    * @private
    */
-  _query: function (sql, callback, retried) {
+  query: function (sql, callback, retried) {
     var self = this
 
     Pg.connect(this.conn, function (error, client, done) {
@@ -1126,29 +1098,10 @@ module.exports = {
       client.query('END;', function (err, result) {
         done()
         if (err && callback) return callback(err)
-        // call _query recursively but only once
-        self._query(sql, callback, true)
+        // call query recursively but only once
+        self.query(sql, callback, true)
       })
     }
-  },
-
-  /**
-   * Creates an index on a given table
-   * @param {string} table - the table to index
-   * @param {string} name - the name of the index
-   * @param {string} using - the actual field and type of the index
-   * @param {function} callback - the callback when the query returns
-   * @private
-   */
-  _createIndex: function (table, name, using, callback) {
-    var sql = 'CREATE INDEX ' + name + ' ON "' + table + '" USING ' + using
-    this._query(sql, function (err) {
-      if (err) {
-        callback(err)
-      } else if (callback) {
-        callback()
-      }
-    })
   },
 
   /**
@@ -1164,37 +1117,24 @@ module.exports = {
   _createTable: function (name, schema, indexes, callback) {
     var self = this
     var sql = "select exists(select * from information_schema.tables where table_name='" + name + "')"
-    this._query(sql, function (err, result) {
+    this.query(sql, function (err, result) {
       if (err) {
         callback('Failed to create table ' + name)
       } else {
         if (result && !result.rows[0].exists) {
           var create = 'CREATE TABLE "' + name + '" ' + schema
           self.log.info(create)
-          self._query(create, function (err, result) {
+          self.query(create, function (err, result) {
             if (err) {
               callback('Failed to create table ' + name + ' error:' + err)
               return
             }
-
             if (indexes && indexes.length) {
-              var indexName = name.replace(/:|-/g, '')
-              var next = function (idx) {
-                if (!idx) {
-                  if (callback) {
-                    callback()
-                  }
-                } else {
-                  self._createIndex(name, indexName + '_' + idx.name, idx.using, function () {
-                    next(indexes.pop())
-                  })
-                }
-              }
-              next(indexes.pop())
-            } else {
-              if (callback) {
-                callback()
-              }
+              Indexing._addIndexes(name, indexes, function (err) {
+                if (callback) callback(err)
+              })
+            } else if (callback) {
+              callback()
             }
           })
         } else if (callback) {

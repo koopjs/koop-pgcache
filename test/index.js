@@ -19,7 +19,7 @@ before(function (done) {
 })
 
 after(function (done) {
-  pgCache._query('BEGIN;drop schema public cascade;create schema public; create extension postgis;COMMIT;', function (err, res) {
+  pgCache.query('BEGIN;drop schema public cascade;create schema public; create extension postgis;COMMIT;', function (err, res) {
     if (err) console.error(err)
     done()
   })
@@ -41,6 +41,10 @@ describe('pgCache Model Tests', function () {
 
   describe('when caching geojson', function () {
     beforeEach(function (done) {
+      repoData[0].info = {
+        _indexGeohash: false,
+        _indexFields: false
+      }
       pgCache.insert(key, repoData[0], 0, function (err) {
         if (err) {
           console.log('insert failed', err)
@@ -572,14 +576,14 @@ describe('pgCache Model Tests', function () {
   })
   describe('working with spatial references', function () {
     before(function (done) {
-      sinon.stub(pgCache, '_query', function (sql, callback) {
+      sinon.stub(pgCache, 'query', function (sql, callback) {
         callback(null, sql)
       })
       done()
     })
 
     after(function (done) {
-      pgCache._query.restore()
+      pgCache.query.restore()
       done()
     })
 

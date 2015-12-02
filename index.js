@@ -4,6 +4,7 @@ var Indexes = require('./lib/indexes')
 var Table = require('./lib/table')
 var Geoservices = require('./lib/geoservices')
 var Geohash = require('./lib/geohash')
+var Select = require('./lib/select')
 
 module.exports = {
   type: 'cache',
@@ -11,7 +12,6 @@ module.exports = {
   version: pkg.version,
   infoTable: 'koopinfo',
   timerTable: 'kooptimers',
-  limit: 2000,
 
   /**
    * Connect to the db with a connection string
@@ -34,10 +34,7 @@ module.exports = {
         process.exit()
       } else {
         // Inject dependencies
-        Indexes.query = self.query.bind(self)
-        Table.query = self.query.bind(self)
-        Geohash.query = self.query.bind(self)
-
+        [Indexes, Table, Geohash, Select].forEach(function (lib) { lib.query = self.query.bind(self) })
         // creates table only if they dont exist
         Table.create(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
         Table.create(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
@@ -48,6 +45,8 @@ module.exports = {
     })
     return this
   },
+
+  select: Select.features,
 
   addIndexes: Indexes.add,
 
@@ -179,113 +178,6 @@ module.exports = {
         callback(error, null)
       } else {
         callback(null, true)
-      }
-    })
-  },
-
-  /**
-   * Get features out of the db
-   *
-   * @param {string} id - the dataset id to insert into
-   * @param {Object} options - optional params used for filtering features (where, geometry, etc)
-   * @param {function} callback - the callback when the query returns
-   */
-  select: function (id, options, callback) {
-    var self = this
-    var layer = (options.layer || 0)
-
-    this.query('select info from "' + this.infoTable + '" where id=\'' + (id + ':' + layer + ':info') + "'", function (err, result) {
-      if (err || !result || !result.rows || !result.rows.length) {
-        callback(new Error('Resource not found'), [])
-      } else if (result.rows[0].info.status === 'processing' && !options.bypassProcessing) {
-        callback(null, [{ status: 'processing' }])
-      } else {
-        var info = result.rows[0].info
-        var select
-        if (options.simplify) {
-          select = "select id, feature->'properties' as props, st_asgeojson(ST_SimplifyPreserveTopology(ST_GeomFromGeoJSON(feature->'geometry'), " + options.simplify + ')) as geom from "' + id + ':' + (options.layer || 0) + '"'
-        } else {
-          select = 'select id, feature->\'properties\' as props, feature->\'geometry\' as geom from "' + id + ':' + layer + '"'
-        }
-
-        // parse the where clause
-        if (options.where) {
-          if (options.where !== '1=1') {
-            var clause = Geoservices.parseWhere(options.where, options.fields)
-            select += ' WHERE ' + clause
-          } else {
-            select += ' WHERE ' + options.where
-          }
-          if (options.idFilter) {
-            select += ' AND ' + options.idFilter
-          }
-        } else if (options.idFilter) {
-          select += ' WHERE ' + options.idFilter
-        }
-
-        // parse the geometry param from GeoServices REST
-        var box = Geoservices.parseGeometry(options.geometry)
-        if (box) {
-          select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
-          var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-          select += "ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
-        }
-
-        // TODO don't do a count here, limits shouldn't be set at the DB level
-        self.query(select.replace(/ id, feature->'properties' as props, feature->'geometry' as geom /, ' count(*) as count '), function (err, result) {
-          if (!options.limit && !err && result.rows.length && (result.rows[0].count > self.limit && options.enforce_limit)) {
-            callback(null, [{
-              exceeds_limit: true,
-              type: 'FeatureCollection',
-              features: [{}],
-              name: info.name,
-              sha: info.sha,
-              info: info.info,
-              updated_at: info.updated_at,
-              retrieved_at: info.retrieved_at,
-              expires_at: info.expires_at,
-              count: result.rows[0].count
-            }])
-          } else {
-            if (options.order_by && options.order_by.length) {
-              select += ' ' + Geoservices.buildSort(options.order_by)
-            } else {
-              select += ' ORDER BY id'
-            }
-            if (options.limit) {
-              select += ' LIMIT ' + options.limit
-            }
-            if (options.offset) {
-              select += ' OFFSET ' + options.offset
-            }
-            self.log.debug('Selecting data', select)
-            self.query(select, function (err, result) {
-              if (err) self.log.error(err)
-              var features = []
-              if (result && result.rows && result.rows.length) {
-                result.rows.forEach(function (row, i) {
-                  features.push({
-                    'type': 'Feature',
-                    'id': row.id,
-                    'geometry': row.geom,
-                    'properties': row.props
-                  })
-                })
-              }
-              callback(null, [{
-                type: 'FeatureCollection',
-                features: features,
-                name: info.name,
-                sha: info.sha,
-                info: info.info,
-                updated_at: info.updated_at,
-                retrieved_at: info.retrieved_at,
-                expires_at: info.expires_at,
-                count: result.rows.length
-              }])
-            })
-          }
-        })
       }
     })
   },

@@ -8,6 +8,7 @@ var key = 'test:repo:file'
 var repoData = require('./fixtures/data.geojson')
 var snowData = require('./fixtures/snow.geojson')
 var pgCache = require('../')
+var Table = require('../lib/table')
 var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
 
 before(function (done) {
@@ -32,7 +33,7 @@ describe('pgCache Model Tests', function () {
       var schema = '(id varchar(100), feature json, geom Geometry(POINT, 4326))'
       var indexes = []
 
-      pgCache._createTable(name, schema, indexes, function (err) {
+      Table.create(name, schema, indexes, function (err) {
         should.not.exist(err)
         done()
       })

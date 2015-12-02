@@ -1,11 +1,9 @@
 var Pg = require('pg')
-var ngeohash = require('ngeohash')
-var centroid = require('turf-centroid')
 var SM = require('sphericalmercator')
 var merc = new SM({ size: 256 })
 var pkg = require('./package')
-var _ = require('lodash')
 var Indexing = require('./lib/indexing')
+var Table = require('./lib/table')
 
 module.exports = {
   type: 'cache',
@@ -37,18 +35,26 @@ module.exports = {
         console.log('Could not connect to the database: ' + err.message)
         process.exit()
       } else {
+        // Inject dependencies
+        Indexing.query = self.query.bind(self)
+        Table.query = self.query.bind(self)
+
         // creates table only if they dont exist
-        self._createTable(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
-        self._createTable(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
+        Table.create(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
+        Table.create(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
       }
       if (callback) {
         callback()
       }
     })
-    // Inject query where needed
-    Indexing.query = this.query.bind(this)
     return this
   },
+
+  addIndexes: Indexing.addIndexes,
+
+  insert: Table.createFeatureTable,
+
+  insertPartial: Table.insertFeatures,
 
   /**
    * Gets the count of all features in a table
@@ -507,143 +513,6 @@ module.exports = {
   },
 
   /**
-   * Creates a table and inserts features and metadat
-   * creates indexes for each property in the features and substring indexes on geohashes
-   *
-   * @param {string} id - the dataset id to insert into
-   * @param {Object} geojson - geojson features
-   * @param {number} layerId - the layer id for this dataset
-   * @param {function} callback - the callback when the query returns
-   */
-  insert: function (id, geojson, layerId, callback) {
-    var self = this
-
-    var info = _.cloneDeep(geojson.info) || {}
-    // DEPRECATED: to be removed in 2.0
-    info.info = geojson.info
-
-    info.name = geojson.name
-    info.updated_at = geojson.updated_at
-    info.expires_at = geojson.expires_at
-    info.retrieved_at = geojson.retrieved_at
-    info.status = geojson.status
-    info.format = geojson.format
-    info.sha = geojson.sha
-    info.host = geojson.host
-
-    var table = id + ':' + layerId
-    var feature = (geojson.length) ? geojson[0].features[0] : geojson.features[0]
-
-    var types = {
-      'esriGeometryPolyline': 'Linestring',
-      'esriGeometryPoint': 'Point',
-      'esriGeometryPolygon': 'Polygon'
-    }
-
-    if (!feature) {
-      feature = { geometry: { type: geojson.geomType || types[geojson.info.geometryType] } }
-    }
-
-    var indexes = Indexing.prepareIndexes(info)
-
-    self._createTable(table, self._buildSchemaFromFeature(feature), indexes, function (err) {
-      if (err) {
-        callback(err, false)
-        return
-      }
-
-      // insert each feature
-      if (geojson.length) {
-        geojson = geojson[0]
-      }
-
-      // TODO why not use an update query here?
-      self.query('delete from "' + self.infoTable + '" where id=\'' + table + ":info'", function (err, res) {
-        if (err) self.log.error(err)
-        self.query('insert into "' + self.infoTable + '" values (\'' + table + ":info','" + JSON.stringify(info).replace(/'/g, '') + "')", function (err, result) {
-          if (!geojson.features.length) return callback(err, true)
-          self.insertPartial(id, geojson, layerId, function (err) {
-            callback(err, true)
-          })
-        })
-      })
-    })
-  },
-
-  /**
-   * Inserts an array of features
-   * used as a way to insert pages of features, and only features, not metadata
-   *
-   * @param {string} id - the dataset id to insert into
-   * @param {Object} geojson - geojson features
-   * @param {number} layerId - the layer id for this dataset
-   * @param {function} callback - the callback when the query returns
-   */
-  insertPartial: function (id, geojson, layerId, callback) {
-    var self = this
-    var table = id + ':' + layerId
-    var sql = 'BEGIN;INSERT INTO "' + table + '" (feature, geohash) VALUES '
-    geojson.features.forEach(function (feature) {
-      sql += self._insertFeature(feature) + ','
-    })
-    sql = sql.slice(0, -1)
-    sql += ';COMMIT;'
-    this.query(sql, function (err, res) {
-      if (err) {
-        self.log.error('insert partial ERROR %s, %s', err, id)
-        self.query('ROLLBACK;', function () {
-          callback(err, false)
-        })
-      } else {
-        self.log.debug('insert partial SUCCESS %s', id)
-        callback(null, true)
-      }
-    })
-  },
-
-  /**
-   * Creates the sql needed to insert the feature
-   *
-   * @param {string} table - the table to insert into
-   * @param {Object} feature - a geojson feature
-   * @private
-   */
-  _insertFeature: function (feature) {
-    var featurestring = JSON.stringify(feature).replace(/'/g, '')
-
-    if (feature.geometry && feature.geometry.coordinates && feature.geometry.coordinates.length) {
-      var geohash = this.createGeohash(feature, this.geohashPrecision)
-      return "('" + featurestring + "', '" + geohash + "')"
-    } else {
-      return "('" + featurestring + "')"
-    }
-  },
-
- /**
-  * Simple wrapper to give acess to the indexing module
-  */
-  addIndexes: Indexing.addIndexes,
-
-  /**
-   * Creates a geohash from a features
-   * computes the centroid of lines and polygons
-   *
-   * @param {Object} feature - a geojson feature
-   * @param {number} precision - the precision at which the geohash will be created
-   * @returns {string} geohash
-   */
-  createGeohash: function (feature, precision) {
-    if (!feature.geometry || !feature.geometry.coordinates) {
-      return
-    }
-    if (feature.geometry.type !== 'Point') {
-      feature = centroid(feature)
-    }
-    var pnt = feature.geometry.coordinates
-    return ngeohash.encode(pnt[1], pnt[0], precision)
-  },
-
-  /**
    * Removes everything in the DB for a given idea
    * will delete all metadata, timers, and features
    * @param {string} id - the dataset id to remove
@@ -686,7 +555,7 @@ module.exports = {
    */
   serviceRegister: function (type, info, callback) {
     var self = this
-    this._createTable(type, '(id varchar(100), host varchar)', null, function (err, result) {
+    Table.create(type, '(id varchar(100), host varchar)', null, function (err, result) {
       if (err) {
         callback(err)
       } else {
@@ -1071,6 +940,7 @@ module.exports = {
         self.log.error('error fetching client from pool', error)
         return callback(error)
       }
+      self.log.debug(truncateSql(sql))
       client.query(sql, function (err, result) {
         // this error occurs when we have an aborted transaction
         // we'll try to clear that transaction
@@ -1090,8 +960,8 @@ module.exports = {
     }
 
     function truncateSql (sql) {
-      if (sql.length < 26) return sql
-      return sql.slice(0, 25) + '...'
+      if (sql.length < 100) return sql
+      return sql.slice(0, 99) + '...'
     }
 
     function handleBrokenTransaction (client, done) {
@@ -1102,67 +972,5 @@ module.exports = {
         self.query(sql, callback, true)
       })
     }
-  },
-
-  /**
-   * Creates a new table
-   * checks to see if the table exists, create it if not
-   *
-   * @param {string} name - the name of the index
-   * @param {string} schema - the schema to use for the table
-   * @param {Array} indexes - an array of indexes to place on the table
-   * @param {function} callback - the callback when the query returns
-   * @private
-   */
-  _createTable: function (name, schema, indexes, callback) {
-    var self = this
-    var sql = "select exists(select * from information_schema.tables where table_name='" + name + "')"
-    this.query(sql, function (err, result) {
-      if (err) {
-        callback('Failed to create table ' + name)
-      } else {
-        if (result && !result.rows[0].exists) {
-          var create = 'CREATE TABLE "' + name + '" ' + schema
-          self.log.info(create)
-          self.query(create, function (err, result) {
-            if (err) {
-              callback('Failed to create table ' + name + ' error:' + err)
-              return
-            }
-            if (indexes && indexes.length) {
-              Indexing._addIndexes(name, indexes, function (err) {
-                if (callback) callback(err)
-              })
-            } else if (callback) {
-              callback()
-            }
-          })
-        } else if (callback) {
-          callback()
-        }
-      }
-    })
-  },
-
-  /**
-   * Builds a table schema from a geojson feature
-   * each schema in the db is essentially the same except for geometry type
-   * which is based off the geometry of the feature passed in here
-   *
-   * @param {Object} feature - a geojson feature   * @returns {string} schema
-   * @private
-   */
-  _buildSchemaFromFeature: function (feature) {
-    var schema = '('
-    var type
-    if (feature && feature.geometry && feature.geometry.type) {
-      type = feature.geometry.type.toUpperCase()
-    } else {
-      // default to point geoms
-      type = 'POINT'
-    }
-    var props = ['id SERIAL PRIMARY KEY', 'feature JSON', 'geom Geometry(' + type + ', 4326)', 'geohash varchar(10)']
-    schema += props.join(',') + ')'
-    return schema
   }
 }

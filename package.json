@@ -37,6 +37,6 @@
     "url": "git://github.com/koopjs/koop-pgcache.git"
   },
   "scripts": {
-    "test": "standard && mocha test/ -t 20000"
+    "test": "standard && mocha test/ -t 10000"
   }
 }

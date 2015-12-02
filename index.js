@@ -1,16 +1,14 @@
 var Pg = require('pg')
-var SM = require('sphericalmercator')
-var merc = new SM({ size: 256 })
 var pkg = require('./package')
-var Indexing = require('./lib/indexing')
+var Indexes = require('./lib/indexes')
 var Table = require('./lib/table')
+var Geoservices = require('./lib/geoservices')
+var Geohash = require('./lib/geohash')
 
 module.exports = {
   type: 'cache',
   name: 'postgis',
   version: pkg.version,
-
-  geohashPrecision: 8,
   infoTable: 'koopinfo',
   timerTable: 'kooptimers',
   limit: 2000,
@@ -36,8 +34,9 @@ module.exports = {
         process.exit()
       } else {
         // Inject dependencies
-        Indexing.query = self.query.bind(self)
+        Indexes.query = self.query.bind(self)
         Table.query = self.query.bind(self)
+        Geohash.query = self.query.bind(self)
 
         // creates table only if they dont exist
         Table.create(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
@@ -50,11 +49,13 @@ module.exports = {
     return this
   },
 
-  addIndexes: Indexing.addIndexes,
+  addIndexes: Indexes.add,
 
   insert: Table.createFeatureTable,
 
   insertPartial: Table.insertFeatures,
+
+  geoHashAgg: Geohash.aggregate,
 
   /**
    * Gets the count of all features in a table
@@ -68,14 +69,14 @@ module.exports = {
     var select = 'select count(*) as count from "' + table + '"'
     if (options.where) {
       if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
+        var clause = Geoservices.parseWhere(options.where)
         select += ' WHERE ' + clause
       } else {
         select += ' WHERE ' + options.where
       }
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = Geoservices.parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -106,14 +107,14 @@ module.exports = {
     var select = 'SELECT ST_AsGeoJSON(ST_Extent(st_geomfromgeojson(feature ->> \'geometry\'))) as extent FROM "' + table + '"'
     if (options.where) {
       if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
+        var clause = Geoservices.parseWhere(options.where)
         select += ' WHERE ' + clause
       } else {
         select += ' WHERE ' + options.where
       }
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = Geoservices.parseGeometry(options.geometry)
     if (box) {
       select += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -183,160 +184,6 @@ module.exports = {
   },
 
   /**
-   * Check for any coded values in the fields
-   * if we find a match, replace value with the coded val
-   *
-   * @param {string} fieldName - the name of field to look for
-   * @param {number} value - the coded value
-   * @param {Array} fields - a list of fields to use for coded value replacements
-   */
-  applyCodedDomains: function (fieldName, value, fields) {
-    fields.forEach(function (field) {
-      if (field.domain && (field.domain.name && field.domain.name === fieldName)) {
-        field.domain.codedValues.forEach(function (coded) {
-          if (parseInt(coded.code, 10) === parseInt(value, 10)) {
-            value = coded.name
-          }
-        })
-      }
-    })
-    return value
-  },
-
-  /**
-   * Creates a "range" filter for querying numeric values
-   *
-   * @param {string} sql - a sql where clause
-   * @param {Array} fields - a list of fields in to support coded value domains
-   */
-  createRangeFilterFromSql: function (sql, fields) {
-    var terms, type
-
-    if (sql.indexOf(' >= ') > -1) {
-      terms = sql.split(' >= ')
-      type = '>='
-    } else if (sql.indexOf(' <= ') > -1) {
-      terms = sql.split(' <= ')
-      // paramIndex = 1
-      type = '<='
-    } else if (sql.indexOf(' = ') > -1) {
-      terms = sql.split(' = ')
-      // paramIndex = 1
-      type = '='
-    } else if (sql.indexOf(' > ') > -1) {
-      terms = sql.split(' > ')
-      // paramIndex = 1
-      type = '>'
-    } else if (sql.indexOf(' < ') > -1) {
-      terms = sql.split(' < ')
-      // paramIndex = 1
-      type = '<'
-    }
-
-    if (terms.length !== 2) { return }
-
-    var fieldName = terms[0].replace(/\'([^\']*)'/g, '$1')
-    var value = terms[1]
-
-    // check for fields and apply any coded domains
-    if (fields) {
-      value = this.applyCodedDomains(fieldName, value, fields)
-    }
-
-    var field = " (feature->'properties'->>'" + fieldName + "')"
-
-    if (parseInt(value, 10) || parseInt(value, 10) === 0) {
-      if (((parseFloat(value) === parseInt(value, 10)) && !isNaN(value)) || value === 0) {
-        field += '::float::int'
-      } else {
-        field += '::float'
-      }
-      return field + ' ' + type + ' ' + value
-    } else {
-      return field + ' ' + type + " '" + value.replace(/'/g, '') + "'"
-    }
-  },
-
-  /**
-  * Create a "like" filter for query string values
-  *
-  * @param {string} sql - a sql where clause
-  * @param {Array} fields - a list of fields in to support coded value domains
-  */
-  createLikeFilterFromSql: function (sql, fields) {
-    var terms = sql.split(' like ')
-    if (terms.length !== 2) { return }
-
-    // replace N for unicode values so we can rehydrate filter pages
-    var value = terms[1].replace(/^N'/g, "'") // .replace(/^\'%|%\'$/g, '')
-    // to support downloads we set quotes on unicode fieldname, here we remove them
-    var fieldName = terms[0].replace(/\'([^\']*)'/g, '$1')
-
-    // check for fields and apply any coded domains
-    if (fields) {
-      value = this.applyCodedDomains(fieldName, value, fields)
-    }
-
-    var field = " (feature->'properties'->>'" + fieldName + "')"
-    return field + ' ilike ' + value
-  },
-
-  /**
-   * Determines if a range or like filter is needed   * appends directly to the sql passed in
-   *
-   * @param {string} sql - a sql where clause
-   * @param {Array} fields - a list of fields in to support coded value domains
-   */
-  createFilterFromSql: function (sql, fields) {
-    if (sql.indexOf(' like ') > -1) {
-      // like
-      return this.createLikeFilterFromSql(sql, fields)
-    } else if (sql.indexOf(' < ') > -1 || sql.indexOf(' > ') > -1 || sql.indexOf(' >= ') > -1 || sql.indexOf(' <= ') > -1 || sql.indexOf(' = ') > -1) {
-      // part of a range
-      return this.createRangeFilterFromSql(sql, fields)
-    }
-  },
-
-  /**
-   * Creates a viable SQL where clause from a passed in SQL (from a url "where" param)
-   *
-   * @param {string} where - a sql where clause
-   * @param {Array} fields - a list of fields in to support coded value domains
-   * @returns {string} sql
-   */
-  createWhereFromSql: function (where, fields) {
-    var self = this
-    var terms = where.split(' AND ')
-    var andWhere = []
-    var orWhere = []
-    var pairs
-
-    terms.forEach(function (term) {
-      // trim spaces
-      term = term.trim()
-      // remove parens
-      term = term.replace(/(^\()|(\)$)/g, '')
-      pairs = term.split(' OR ')
-      if (pairs.length > 1) {
-        pairs.forEach(function (item) {
-          orWhere.push(self.createFilterFromSql(item, fields))
-        })
-      } else {
-        pairs.forEach(function (item) {
-          andWhere.push(self.createFilterFromSql(item, fields))
-        })
-      }
-    })
-    var sql = []
-    if (andWhere.length) {
-      sql.push(andWhere.join(' AND '))
-    } else if (orWhere.length) {
-      sql.push('(' + orWhere.join(' OR ') + ')')
-    }
-    return sql.join(' AND ')
-  },
-
-  /**
    * Get features out of the db
    *
    * @param {string} id - the dataset id to insert into
@@ -364,7 +211,7 @@ module.exports = {
         // parse the where clause
         if (options.where) {
           if (options.where !== '1=1') {
-            var clause = self.createWhereFromSql(options.where, options.fields)
+            var clause = Geoservices.parseWhere(options.where, options.fields)
             select += ' WHERE ' + clause
           } else {
             select += ' WHERE ' + options.where
@@ -377,7 +224,7 @@ module.exports = {
         }
 
         // parse the geometry param from GeoServices REST
-        var box = self.parseGeometry(options.geometry)
+        var box = Geoservices.parseGeometry(options.geometry)
         if (box) {
           select += (options.where || options.idFilter) ? ' AND ' : ' WHERE '
           var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -401,7 +248,7 @@ module.exports = {
             }])
           } else {
             if (options.order_by && options.order_by.length) {
-              select += ' ' + self._buildSort(options.order_by)
+              select += ' ' + Geoservices.buildSort(options.order_by)
             } else {
               select += ' ORDER BY id'
             }
@@ -441,75 +288,6 @@ module.exports = {
         })
       }
     })
-  },
-
-  /**
-   * Parses a geometry Object
-   * TODO this method needs some to support other geometry types. Right now it assumes Envelopes
-   *
-   * @param {string} geometry - a geometry used for filtering data spatially
-   */
-  parseGeometry: function (geometry) {
-    var bbox = { spatialReference: {wkid: 4326} }
-    var geom
-
-    if (!geometry) return false
-
-    if (typeof geometry === 'string') {
-      try {
-        geom = JSON.parse(geometry)
-      } catch (e) {
-        try {
-          if (geometry.split(',').length === 4) {
-            geom = bbox
-            var extent = geometry.split(',')
-            geom.xmin = extent[0]
-            geom.ymin = extent[1]
-            geom.xmax = extent[2]
-            geom.ymax = extent[3]
-          }
-        } catch (error) {
-          this.log.error('Error building bbox from query ' + geometry)
-        }
-      }
-    } else {
-      geom = geometry
-    }
-
-    if (geom && (geom.xmin || geom.xmin === 0) && (geom.ymin || geom.ymin === 0) && geom.spatialReference && geom.spatialReference.wkid !== 4326) {
-      // is this a valid geometry Object that has a spatial ref different than 4326?
-      var mins = merc.inverse([geom.xmin, geom.ymin])
-      var maxs = merc.inverse([geom.xmax, geom.ymax])
-
-      bbox.xmin = mins[0]
-      bbox.ymin = mins[1]
-      bbox.xmax = maxs[0]
-      bbox.ymax = maxs[1]
-    } else if (geom && geom.spatialReference && geom.spatialReference.wkid === 4326) {
-      bbox = geom
-    }
-    // check to make sure everything is numeric
-    if (this.isNumeric(bbox.xmin) && this.isNumeric(bbox.xmax) &&
-      this.isNumeric(bbox.ymin) && this.isNumeric(bbox.ymax)) {
-      return bbox
-    } else {
-      return false
-    }
-  },
-
-  /**
-  * Creates a SQL ORDER BY statement
-  *
-  * @param {array} sorts - an array of {field: order} objects
-  * @return {string} a well-formed sql order by statement
-  */
-  _buildSort: function (sorts) {
-    var order = 'ORDER BY '
-    sorts.forEach(function (field) {
-      var name = Object.keys(field)[0]
-      order += "feature->'properties'->>'" + name + "' " + field[name] + ', '
-    })
-    return order.slice(0, -2)
   },
 
   /**
@@ -678,123 +456,6 @@ module.exports = {
     })
   },
 
-  isNumeric: function (num) {
-    return (num >= 0 || num < 0)
-  },
-
-  /**
-   * Get a geohash aggregation for a set of features in the db
-   * this will auto-reduce the precision of the geohashes if the given
-   * precision exceeds the given limit.
-   *
-   * @param {string} table - the table to query
-   * @param {number} limit - the max number of geohash to send back
-   * @param {string} precision - the precision at which to extract geohashes
-   * @param {Object} options - optional params like where and geometry
-   * @param {function} callback - the callback when the query returns
-   */
-  geoHashAgg: function (table, limit, precision, options, callback) {
-    var self = this
-    options.whereFilter = null
-    options.geomFilter = null
-
-    // parse the where clause
-    if (options.where) {
-      if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
-        options.whereFilter = ' WHERE ' + clause
-      } else {
-        options.whereFilter = ' WHERE ' + options.where
-      }
-      // replace ilike and %% for faster filter queries...
-      options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
-    }
-
-    var box = this.parseGeometry(options.geometry)
-    // parse the geometry into a bbox
-    if (box) {
-      var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
-      options.geomFilter = " ST_GeomFromGeoJSON(feature->>'geometry') && ST_SetSRID('BOX3D(" + bbox + ")'::box3d,4326)"
-    }
-
-    // recursively get geohash counts until we have a precision
-    // that reutrns less than the row limit
-    // this will return the precision that will return the number
-    // of geohashes less than the limit
-    var reducePrecision = function (table, p, options, callback) {
-      self.countDistinctGeoHash(table, p, options, function (err, count) {
-        if (parseInt(count, 0) > limit) {
-          reducePrecision(table, p - 1, options, callback)
-        } else {
-          callback(err, p)
-        }
-      })
-    }
-
-    var agg = {}
-
-    reducePrecision(table, precision, options, function (err, newPrecision) {
-      if (err) self.log.error(err)
-
-      var geoHashSelect
-
-      if (newPrecision <= precision) {
-        geoHashSelect = 'substring(geohash,0,' + (newPrecision) + ')'
-      } else {
-        geoHashSelect = 'geohash'
-      }
-
-      var sql = 'SELECT count(id) as count, ' + geoHashSelect + ' as geohash from "' + table + '"'
-
-      // apply any filters to the sql
-      if (options.whereFilter) {
-        sql += options.whereFilter
-      }
-      if (options.geomFilter) {
-        sql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
-      }
-
-      sql += ' GROUP BY ' + geoHashSelect
-      self.log.info('GEOHASH Query', sql)
-      self.query(sql, function (err, res) {
-        if (!err && res && res.rows.length) {
-          res.rows.forEach(function (row) {
-            agg[row.geohash] = row.count
-          })
-          callback(err, agg)
-        } else {
-          callback(err, res)
-        }
-      })
-    })
-  },
-
-  /**
-   * Get the count of distinct geohashes for a query
-   *
-   * @param {string} table - the table to query
-   * @param {string} precision - the precision at which to extract the distinct geohash counts    * @param {Object} options - optional params like where and geometry
-   * @param {function} callback - the callback when the query returns
-   */
-  countDistinctGeoHash: function (table, precision, options, callback) {
-    var countSql = 'select count(DISTINCT(substring(geohash,0,' + precision + '))) as count from "' + table + '"'
-
-    // apply any filters to the sql
-    if (options.whereFilter) {
-      countSql += options.whereFilter
-    }
-
-    if (options.geomFilter) {
-      countSql += ((options.whereFilter) ? ' AND ' : ' WHERE ') + options.geomFilter
-    }
-
-    this.log.debug(countSql)
-    this.query(countSql, function (err, res) {
-      if (err) return callback(err, null)
-      callback(null, res.rows[0].count)
-    })
-  },
-
   /**
    * Gets a statistic on one field at a time
    * Supports where and geometry filters and group by
@@ -844,7 +505,7 @@ module.exports = {
     // apply where and geometry filter
     if (options.where) {
       if (options.where !== '1=1') {
-        var clause = this.createWhereFromSql(options.where)
+        var clause = Geoservices.parseWhere(options.where)
         sql += ' WHERE ' + clause
       } else {
         sql += ' WHERE ' + options.where
@@ -853,7 +514,7 @@ module.exports = {
       options.whereFilter = options.whereFilter.replace(/ilike/g, '=').replace(/%/g, '')
     }
 
-    var box = this.parseGeometry(options.geometry)
+    var box = Geoservices.parseGeometry(options.geometry)
     if (box) {
       sql += (options.where) ? ' AND ' : ' WHERE '
       var bbox = box.xmin + ' ' + box.ymin + ',' + box.xmax + ' ' + box.ymax
@@ -956,12 +617,12 @@ module.exports = {
 
     function logQueryError (err) {
       err.msg = err.message
-      self.log.error('Error querying', truncateSql(sql), JSON.stringify(err))
+      self.log.error('Error querying', JSON.stringify(err))
     }
 
     function truncateSql (sql) {
-      if (sql.length < 100) return sql
-      return sql.slice(0, 99) + '...'
+      if (sql.length < 300) return sql
+      return sql.slice(0, 299) + '...'
     }
 
     function handleBrokenTransaction (client, done) {

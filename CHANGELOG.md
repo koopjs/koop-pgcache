@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* New method `addIndexes` allows indexes to be added at any time
+* Index creation at table creation time can be disable
+
+### Changed
+* Methods for querying, geoservices parsing, table creation/insertion and indexing moved to seperate mdules
+* Inserts used more efficient multi-row method
+* All SQL statements are logged at debug level
+
 ## [1.4.3] - 2015-11-30
 ### Added
 * Log full error object in case of query failure

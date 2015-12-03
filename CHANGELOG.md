@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.5.0] - 2015-12-03
 ### Added
 * New method `addIndexes` allows indexes to be added at any time
 * Index creation at table creation time can be disable
@@ -151,6 +151,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.5.0]: https://github.com/Esri/koop-pgcache/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/Esri/koop-pgcache/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/Esri/koop-pgcache/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/Esri/koop-pgcache/compare/v1.4.0...v1.4.1

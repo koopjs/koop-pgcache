@@ -118,6 +118,23 @@ describe('pgCache Model Tests', function () {
       pgCache.select(key, { layer: 0 }, function (error, success) {
         should.not.exist(error)
         should.exist(success[0].features)
+        success[0].features.length.should.equal(417)
+        done()
+      })
+    })
+
+    it('should be able to stream data from the db', function (done) {
+      var exportStream = pgCache.createExportStream(key + ':' + 0, {json: true})
+      exportStream.toArray(function (features) {
+        features.length.should.equal(417)
+        done()
+      })
+    })
+
+    it('should be able to stream data from the db with filters', function (done) {
+      var exportStream = pgCache.createExportStream(key + ':' + 0, {where: '\'total precip\' = \'0.31\'', geometry: '-180,90,180,-90'})
+      exportStream.toArray(function (features) {
+        features.length.should.equal(5)
         done()
       })
     })

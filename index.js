@@ -5,6 +5,7 @@ var Table = require('./lib/table')
 var Geoservices = require('./lib/geoservices')
 var Geohash = require('./lib/geohash')
 var Select = require('./lib/select')
+var ExportStream = require('./lib/exportStream')
 
 module.exports = {
   type: 'cache',
@@ -55,6 +56,8 @@ module.exports = {
   insertPartial: Table.insertFeatures,
 
   geoHashAgg: Geohash.aggregate,
+
+  createExportStream: function (table, options) { return ExportStream.create(this.conn, table, options) },
 
   /**
    * Gets the count of all features in a table
@@ -171,7 +174,8 @@ module.exports = {
    */
   updateInfo: function (table, info, callback) {
     this.log.debug('Updating info %s %s', table, info.status)
-    this.query('update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'", function (err, result) {
+    var sql = 'update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'"
+    this.query(sql, function (err, result) {
       if (err || !result) {
         var error = new Error('Resource not found')
         error.table = table

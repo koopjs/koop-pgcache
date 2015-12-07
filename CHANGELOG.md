@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Added
+* `pgCache.createExportStream` returns a stream of features either as strings or JSON directly from the DB
+
 ## [1.5.1] - 2012-12-04
 ### Fixed
 * Test ensures success of idFilter

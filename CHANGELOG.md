@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * `pgCache.createExportStream` returns a stream of features either as strings or JSON directly from the DB
 
+### Fixed
+* Fix geoservices parsing when there is no where clause
+
 ## [1.5.1] - 2012-12-04
 ### Fixed
 * Test ensures success of idFilter

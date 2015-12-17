@@ -2,6 +2,18 @@
 var Geoservices = require('../lib/geoservices')
 var should = require('should') //eslint-disable-line
 
+describe('when parsing geoservices', function () {
+  it('should return an order only when no parameters are given', function (done) {
+    var options = {
+      table: 'foo',
+      layer: 0
+    }
+    var select = Geoservices.parse(options)
+    select.should.equal(' ORDER BY id')
+    done()
+  })
+})
+
 describe('when parsing geometries', function () {
   it('should parse string geometries', function (done) {
     var geom = Geoservices.parseGeometry('11.296916335529545,50.976109119993865,14.273970437121521,52.39566469623532')

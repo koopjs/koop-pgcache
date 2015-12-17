@@ -2,14 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.6.0] - 2015-12-17
 ### Added
 * `pgCache.createExportStream` returns a stream of features either as strings or JSON directly from the DB
 
 ### Fixed
 * Fix geoservices parsing when there is no where clause
 
-## [1.5.1] - 2012-12-04
+## [1.5.1] - 2015-12-04
 ### Fixed
 * Test ensures success of idFilter
 
@@ -162,6 +162,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.6.0]: https://github.com/Esri/koop-pgcache/compare/v1.5.1...v1.6.0
 [1.5.1]: https://github.com/Esri/koop-pgcache/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/Esri/koop-pgcache/compare/v1.4.3...v1.5.0
 [1.4.3]: https://github.com/Esri/koop-pgcache/compare/v1.4.2...v1.4.3

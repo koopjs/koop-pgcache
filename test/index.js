@@ -259,7 +259,7 @@ describe('pgCache Model Tests', function () {
           pgCache.select(gKey, { layer: 0, where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land = \'Poland\')  AND Art = \'BRL\'' }, function (err, res) {
             if (err) throw err
             should.not.exist(error)
-            res[0].features.length.should.equal(7)
+            res[0].features.length.should.equal(5)
 
             pgCache.remove(gKey + ':0', function (err, result) {
               should.not.exist(err)
@@ -359,9 +359,9 @@ describe('pgCache Model Tests', function () {
       pgCache.remove(gKey + ':0', function (err, result) {
         if (err) throw err
         pgCache.insert(gKey, options, 0, function (e, s) {
-          pgCache.geoHashAgg(gKey + ':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 AND  (Land = \'Germany\' OR Land  = \'Poland\')  AND Art = \'BRL\''}, function (err, res) {
+          pgCache.geoHashAgg(gKey + ':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 AND (Land = \'Germany\' OR Land = \'Poland\') AND Art = \'BRL\''}, function (err, res) {
             should.not.exist(err)
-            Object.keys(res).length.should.equal(7)
+            Object.keys(res).length.should.equal(5)
             done()
           })
         })
@@ -372,9 +372,9 @@ describe('pgCache Model Tests', function () {
       pgCache.remove(gKey + ':0', function (err, result) {
         if (err) throw err
         pgCache.insert(gKey, options, 0, function (e, s) {
-          pgCache.geoHashAgg(gKey + ':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 OR (Land = \'Germany\' OR Land  = \'Poland\') AND Art = \'BRL\''}, function (err, res) {
+          pgCache.geoHashAgg(gKey + ':0', limit, precision, {where: 'ID >= 2894 AND ID <= 3401 OR (Land = \'Germany\' OR Land = \'Poland\') AND Art = \'BRL\''}, function (err, res) {
             should.not.exist(err)
-            Object.keys(res).length.should.equal(10)
+            Object.keys(res).length.should.equal(64)
             done()
           })
         })

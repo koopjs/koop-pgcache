@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Query parsing is more accurate in the face of nesting and or conditions
+
 ## [1.6.0] - 2015-12-17
 ### Added
 * `pgCache.createExportStream` returns a stream of features either as strings or JSON directly from the DB

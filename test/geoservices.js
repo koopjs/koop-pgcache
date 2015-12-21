@@ -1,15 +1,96 @@
-/*global  describe, it  */
+/*global describe, it  */
 var Geoservices = require('../lib/geoservices')
-var should = require('should') //eslint-disable-line
+var should = require('should') // eslint-disable-line
 
-describe('when parsing geoservices', function () {
+describe('when parsing where clauses', function () {
   it('should return an order only when no parameters are given', function (done) {
     var options = {
       table: 'foo',
       layer: 0
     }
-    var select = Geoservices.parse(options)
-    select.should.equal(' ORDER BY id')
+    var where = Geoservices.parse(options)
+    where.should.equal(' ORDER BY id')
+    done()
+  })
+
+  it('should return an order only when where = 1=1 and no other paramters are given', function (done) {
+    var options = {
+      where: '1=1'
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(' ORDER BY id')
+    done()
+  })
+
+  it('should parse a single filter correctly', function (done) {
+    var options = {
+      where: 'OBJECTID > 0'
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'OBJECTID')::float > 0 ORDER BY id")
+    done()
+  })
+
+  it('should parse a single filter correctly when there are no spaces between the field and the filter condition', function (done) {
+    var options = {
+      where: 'OBJECTID>0'
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'OBJECTID')::float > 0 ORDER BY id")
+    done()
+  })
+
+  it('should parse multiple filters correctly when using AND', function (done) {
+    var options = {
+      where: 'OBJECTID > 0 AND FOO > 1'
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'OBJECTID')::float > 0 AND (feature->'properties'->>'FOO')::float > 1 ORDER BY id")
+    done()
+  })
+
+  it('should parse multiple filters correctly when using AND & OR', function (done) {
+    var options = {
+      where: "(OBJECTID > 0 AND FOO > 1) OR BAR like 'tree'"
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE ((feature->'properties'->>'OBJECTID')::float > 0 AND (feature->'properties'->>'FOO')::float > 1) OR feature->'properties'->>'BAR' ILIKE 'tree' ORDER BY id")
+    done()
+  })
+
+  it('should respect field names with spaces', function (done) {
+    var options = {
+      where: "'Total Precip' > 30"
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'Total Precip')::float > 30 ORDER BY id")
+    done()
+  })
+
+  it('should not cast fields when they are equal to a string', function (done) {
+    var options = {
+      where: "Foo = 'Bar'"
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE feature->'properties'->>'Foo' = 'Bar' ORDER BY id")
+    done()
+  })
+
+  it('should parse clauses with many ids', function (done) {
+    var options = {
+      where: "ID >= 2894 AND ID <= 2997 AND Land like '%germany%' AND Art like '%BRL%'"
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'ID')::float >= 2894 AND (feature->'properties'->>'ID')::float <= 2997 AND feature->'properties'->>'Land' ILIKE '%germany%' AND feature->'properties'->>'Art' ILIKE '%BRL%' ORDER BY id")
+    done()
+  })
+
+  it('should parse clauses with parentheticals on the inside', function (done) {
+    var options = {
+      where: "ID >= 2894 AND ID <= 3401 OR (Land = 'Germany' OR Land = 'Poland') AND Art = 'BRL'"
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(" WHERE (feature->'properties'->>'ID')::float >= 2894 AND (feature->'properties'->>'ID')::float <= 3401 OR (feature->'properties'->>'Land' = 'Germany' OR feature->'properties'->>'Land' = 'Poland') AND feature->'properties'->>'Art' = 'BRL' ORDER BY id")
     done()
   })
 })
@@ -72,7 +153,7 @@ describe('when filtering with coded domains', function () {
       name: 'NAME',
       codedValues: [
         {
-          name: 'Name0',
+          name: 'Decoded',
           code: 0
         },
         {
@@ -83,12 +164,14 @@ describe('when filtering with coded domains', function () {
     }
   }]
 
-  var value = 0
-  var fieldName = 'NAME'
-
-  it('should replace value', function (done) {
-    value = Geoservices.applyCodedDomains(fieldName, value, fields)
-    value.should.equal('Name0')
+  it('should replace decode a CVD', function (done) {
+    var options = {
+      where: 'NAME = 0',
+      fields: fields
+    }
+    var where = Geoservices.parse(options)
+    console.log(where)
+    where.indexOf('Decoded').should.be.above(-1)
     done()
   })
 })

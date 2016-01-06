@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* ExportStream emits error when psql fails
+
 ## [1.6.1] - 2015-12-21
 ### Fixed
 * Query parsing is more accurate in the face of nesting and or conditions

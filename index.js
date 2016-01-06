@@ -9,7 +9,7 @@ var ExportStream = require('./lib/exportStream')
 
 module.exports = {
   type: 'cache',
-  name: 'postgis',
+  plugin_name: 'postgis',
   version: pkg.version,
   infoTable: 'koopinfo',
   timerTable: 'kooptimers',

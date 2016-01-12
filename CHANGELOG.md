@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.6.3] - 2016-01-12
 ### Fixed
 * Handle cases where JSON includes strings like `"Kenneth \"Ken\" Plum"`
 
@@ -174,32 +174,33 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
-[1.6.2]: https://github.com/Esri/koop-pgcache/compare/v1.6.1...v1.6.2
-[1.6.1]: https://github.com/Esri/koop-pgcache/compare/v1.6.0...v1.6.1
-[1.6.0]: https://github.com/Esri/koop-pgcache/compare/v1.5.1...v1.6.0
-[1.5.1]: https://github.com/Esri/koop-pgcache/compare/v1.5.0...v1.5.1
-[1.5.0]: https://github.com/Esri/koop-pgcache/compare/v1.4.3...v1.5.0
-[1.4.3]: https://github.com/Esri/koop-pgcache/compare/v1.4.2...v1.4.3
-[1.4.2]: https://github.com/Esri/koop-pgcache/compare/v1.4.1...v1.4.2
-[1.4.1]: https://github.com/Esri/koop-pgcache/compare/v1.4.0...v1.4.1
-[1.4.0]: https://github.com/Esri/koop-pgcache/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/Esri/koop-pgcache/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/Esri/koop-pgcache/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/Esri/koop-pgcache/compare/v1.0.1...v1.1.0
-[1.0.1]: https://github.com/Esri/koop-pgcache/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/Esri/koop-pgcache/compare/v0.2.2...v1.0.0
-[0.2.2]: https://github.com/Esri/koop-pgcache/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/Esri/koop-pgcache/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/Esri/koop-pgcache/compare/v0.1.6...v0.2.0
-[0.1.6]: https://github.com/Esri/koop-pgcache/compare/v0.1.5...v0.1.6
-[0.1.5]: https://github.com/Esri/koop-pgcache/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/Esri/koop-pgcache/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/Esri/koop-pgcache/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/Esri/koop-pgcache/compare/v0.1.1...v0.1.1
-[0.1.0]: https://github.com/Esri/koop-pgcache/compare/v0.0.6...v0.1.0
-[0.0.6]: https://github.com/Esri/koop-pgcache/compare/v0.0.5...v0.0.6
-[0.0.5]: https://github.com/Esri/koop-pgcache/compare/v0.0.4...v0.0.5
-[0.0.4]: https://github.com/Esri/koop-pgcache/compare/v0.0.3...v0.0.4
-[0.0.3]: https://github.com/Esri/koop-pgcache/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/Esri/koop-pgcache/compare/v0.0.1...v0.0.2
+[1.6.3]: https://github.com/koopjs/koop-pgcache/compare/v1.6.2...v1.6.3
+[1.6.2]: https://github.com/koopjs/koop-pgcache/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/koopjs/koop-pgcache/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/koopjs/koop-pgcache/compare/v1.5.1...v1.6.0
+[1.5.1]: https://github.com/koopjs/koop-pgcache/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/koopjs/koop-pgcache/compare/v1.4.3...v1.5.0
+[1.4.3]: https://github.com/koopjs/koop-pgcache/compare/v1.4.2...v1.4.3
+[1.4.2]: https://github.com/koopjs/koop-pgcache/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/koopjs/koop-pgcache/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/koopjs/koop-pgcache/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/koopjs/koop-pgcache/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/koopjs/koop-pgcache/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/koopjs/koop-pgcache/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/koopjs/koop-pgcache/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/koopjs/koop-pgcache/compare/v0.2.2...v1.0.0
+[0.2.2]: https://github.com/koopjs/koop-pgcache/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/koopjs/koop-pgcache/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/koopjs/koop-pgcache/compare/v0.1.6...v0.2.0
+[0.1.6]: https://github.com/koopjs/koop-pgcache/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/koopjs/koop-pgcache/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/koopjs/koop-pgcache/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/koopjs/koop-pgcache/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/koopjs/koop-pgcache/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/koopjs/koop-pgcache/compare/v0.1.1...v0.1.1
+[0.1.0]: https://github.com/koopjs/koop-pgcache/compare/v0.0.6...v0.1.0
+[0.0.6]: https://github.com/koopjs/koop-pgcache/compare/v0.0.5...v0.0.6
+[0.0.5]: https://github.com/koopjs/koop-pgcache/compare/v0.0.4...v0.0.5
+[0.0.4]: https://github.com/koopjs/koop-pgcache/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/koopjs/koop-pgcache/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/koopjs/koop-pgcache/compare/v0.0.1...v0.0.2

@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Handle cases where JSON includes strings like `"Kenneth \"Ken\" Plum"`
+
 ## [1.6.2] - 2016-01-07
 ### Fixed
 * ExportStream emits error when psql fails

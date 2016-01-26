@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.6.4] - 2016-01-26
+### Fixed
+* Return error object when table creation fails
+
 ## [1.6.3] - 2016-01-12
 ### Fixed
 * Handle cases where JSON includes strings like `"Kenneth \"Ken\" Plum"`
@@ -174,6 +178,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.6.4]: https://github.com/koopjs/koop-pgcache/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/koopjs/koop-pgcache/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/koopjs/koop-pgcache/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/koopjs/koop-pgcache/compare/v1.6.0...v1.6.1

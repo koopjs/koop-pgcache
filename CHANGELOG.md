@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Respect resultOffset
+* Respect resultRecordCount
+
 ## [1.6.4] - 2016-01-26
 ### Fixed
 * Return error object when table creation fails

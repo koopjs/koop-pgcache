@@ -22,6 +22,28 @@ describe('when parsing where clauses', function () {
     done()
   })
 
+  it('should respect resultOffset', function (done) {
+    var options = {
+      where: '1=1',
+      resultOffset: 100,
+      offset: undefined
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(' ORDER BY id OFFSET 100')
+    done()
+  })
+
+  it('should respect resultRecordCount', function (done) {
+    var options = {
+      where: '1=1',
+      resultRecordCount: 100,
+      limit: undefined
+    }
+    var where = Geoservices.parse(options)
+    where.should.equal(' ORDER BY id LIMIT 100')
+    done()
+  })
+
   it('should parse a single filter correctly', function (done) {
     var options = {
       where: 'OBJECTID > 0'

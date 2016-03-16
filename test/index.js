@@ -9,11 +9,12 @@ var repoData = require('./fixtures/data.geojson')
 var snowData = require('./fixtures/snow.geojson')
 var pgCache = require('../')
 var Table = require('../lib/table')
-var config = JSON.parse(fs.readFileSync(__dirname + '/config.json'))
+var path = require('path')
+var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
 
 before(function (done) {
   pgCache.connect(config.db.conn, {}, function () {
-    config.logfile = __dirname + '/test.log'
+    config.logfile = path.join(__dirname, 'test.log')
     pgCache.log = new Logger(config)
     done()
   })

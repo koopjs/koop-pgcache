@@ -84,6 +84,17 @@ describe('pgCache Model Tests', function () {
       })
     })
 
+    it('should update info with a non-escaped single quote', function (done) {
+      pgCache.updateInfo(key + ':0', {test: "foobar 'baz' bing"}, function (err, data) {
+        should.not.exist(err)
+        pgCache.getInfo(key + ':0', function (err, data) {
+          should.not.exist(err)
+          data.test.should.equal("foobar 'baz' bing")
+          done()
+        })
+      })
+    })
+
     it('should insert data', function (done) {
       var snowKey = 'test:snow:data'
       pgCache.insert(snowKey, snowData, 0, function (error, success) {

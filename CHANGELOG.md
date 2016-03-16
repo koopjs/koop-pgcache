@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+### Fixed
+* Escape single quotes in info doc
+
 ## [1.6.5] - 2016-02-22
 ### Fixed
 * Respect resultOffset

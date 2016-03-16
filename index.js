@@ -174,7 +174,8 @@ module.exports = {
    */
   updateInfo: function (table, info, callback) {
     this.log.debug('Updating info %s %s', table, info.status)
-    var sql = 'update ' + this.infoTable + " set info = '" + JSON.stringify(info) + "' where id = '" + table + ":info'"
+    info = JSON.stringify(info).replace(/'/g, "''")
+    var sql = 'update ' + this.infoTable + " set info = '" + info + "' where id = '" + table + ":info'"
     this.query(sql, function (err, result) {
       if (err || !result) {
         var error = new Error('Resource not found')

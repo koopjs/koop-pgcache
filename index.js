@@ -36,7 +36,7 @@ module.exports = {
         if (retried < 3) {
           setTimeout(function () {
             self.connect(conn, koop, callback, retried + 1)
-          }, 3000)
+          }, retried * 3000)
         } else {
           process.exit(1)
         }

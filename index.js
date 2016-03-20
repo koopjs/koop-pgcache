@@ -32,8 +32,8 @@ module.exports = {
     this.client.connect(function (err) {
       if (err) {
         self.log.error('Could not connect to the database: ' + err.message)
-        retried = retried || 0
-        if (retried < 3) {
+        retried = retried || 1
+        if (retried < 5) {
           setTimeout(function () {
             self.connect(conn, koop, callback, retried + 1)
           }, retried * 3000)

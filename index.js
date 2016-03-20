@@ -21,7 +21,7 @@ module.exports = {
    * @param {Object} koop - an instance of koop, mainlt for central/shared logging
    * @param {function} optional callback for when the db is ready
    */
-  connect: function (conn, koop, callback) {
+  connect: function (conn, koop, callback, retried) {
     var self = this
     // use the koop logger
     this.log = koop.log
@@ -31,8 +31,14 @@ module.exports = {
     this.client = new Pg.Client(conn)
     this.client.connect(function (err) {
       if (err) {
-        console.log('Could not connect to the database: ' + err.message)
-        process.exit()
+        self.log.error('Could not connect to the database: ' + err.message)
+        if (retried < 3) {
+          setTimeout(function () {
+            self.connect(conn, koop, callback, retried + 1)
+          }, 3000)
+        } else {
+          process.exit(1)
+        }
       } else {
         // Inject dependencies
         [Indexes, Table, Geohash, Select].forEach(function (lib) { lib.query = self.query.bind(self) })
@@ -40,9 +46,7 @@ module.exports = {
         Table.create(self.infoTable, '(id varchar(255) PRIMARY KEY, info JSON)', null)
         Table.create(self.timerTable, '(id varchar(255) PRIMARY KEY, expires varchar(25))', null)
       }
-      if (callback) {
-        callback()
-      }
+      if (callback) callback()
     })
     return this
   },

@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.7.0] - 2016-03-20
+### Added
+* Cache will retry initial connection if DB is not available
+
 ## [1.6.6] - 2016-03-16
 ### Fixed
 * Escape single quotes in info doc
@@ -187,6 +191,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.7.0]: https://github.com/koopjs/koop-pgcache/compare/v1.6.6...v1.7.0
 [1.6.6]: https://github.com/koopjs/koop-pgcache/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/koopjs/koop-pgcache/compare/v1.6.4...v1.6.5
 [1.6.4]: https://github.com/koopjs/koop-pgcache/compare/v1.6.3...v1.6.4

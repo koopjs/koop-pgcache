@@ -1,4 +1,4 @@
-/*global before, after, describe, beforeEach, it, afterEach */
+/* global before, after, describe, beforeEach, it, afterEach */
 
 var should = require('should')
 var fs = require('fs')
@@ -13,9 +13,8 @@ var path = require('path')
 var config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')))
 
 before(function (done) {
-  pgCache.connect(config.db.conn, {}, function () {
+  pgCache.connect(config.db.conn, {log: new Logger(config)}, function () {
     config.logfile = path.join(__dirname, 'test.log')
-    pgCache.log = new Logger(config)
     done()
   })
 })

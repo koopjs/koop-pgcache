@@ -324,12 +324,12 @@ module.exports = {
   timerSet: function (key, expires, callback) {
     var self = this
     var now = new Date()
-    var expires_at = new Date(now.getTime() + expires)
+    var expiresAt = new Date(now.getTime() + expires)
     this.query('delete from "' + this.timerTable + '" WHERE id=\'' + key + "'", function (err, res) {
       if (err) {
         callback(err)
       } else {
-        self.query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + "', '" + expires_at.getTime() + "')", function (err, res) {
+        self.query('insert into "' + self.timerTable + '" (id, expires) VALUES (\'' + key + "', '" + expiresAt.getTime() + "')", function (err, res) {
           callback(err, res)
         })
       }

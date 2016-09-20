@@ -1,4 +1,4 @@
-/*global describe, it  */
+/* global describe, it  */
 var Geoservices = require('../lib/geoservices')
 var should = require('should') // eslint-disable-line
 

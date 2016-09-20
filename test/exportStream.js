@@ -1,4 +1,4 @@
-/*global describe, it */
+/* global describe, it */
 var should = require('should')
 var ExportStream = require('../lib/exportStream')
 

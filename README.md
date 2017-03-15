@@ -1,5 +1,7 @@
 # koop-pgcache
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/koopjs/koop-pgcache.svg)](https://greenkeeper.io/)
+
 [![npm][npm-img]][npm-url]
 [![travis][travis-image]][travis-url]
 

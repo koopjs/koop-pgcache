@@ -9,11 +9,11 @@ script:
   - npm test
 
 addons:
-  postgresql: "9.6"
+  postgresql: "9.3"
 
 
 before_script:
   - sudo apt-get -qq update
   - sudo apt-get install -y postgresql-9.6-postgis-2.4
   - psql -c 'create database koopdev;' -U postgres
-  - psql -U postgres -d test -c 'create extension postgis'
+  - psql -U postgres -d koopdev -c 'create extension postgis'

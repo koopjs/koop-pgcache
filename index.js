@@ -223,7 +223,7 @@ module.exports = {
    * @param {function} callback - the callback when the query returns
    */
   dropTable: function (table, callback) {
-    this.query('drop table "' + table + '"', callback)
+    this.query('DROP TABLE IF EXISTS "' + table + '"', callback)
   },
 
   /**

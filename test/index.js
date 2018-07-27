@@ -46,14 +46,12 @@ describe('pgCache Model Tests', function () {
 
       Table.create(name, schema, indexes, function (err) {
         should.not.exist(err)
-
         Table.create(name, schema, indexes, function (err) {
           should.not.exist(err)
           done()
         })
       })
     })
-
   })
 
   describe('when caching geojson', function () {

@@ -38,6 +38,22 @@ describe('pgCache Model Tests', function () {
         done()
       })
     })
+
+    it('Skip creating a table if it already exists - w/o erroring', function (done) {
+      var name = 'testtable2'
+      var schema = '(id varchar(100), feature json, geom Geometry(POINT, 4326))'
+      var indexes = []
+
+      Table.create(name, schema, indexes, function (err) {
+        should.not.exist(err)
+
+        Table.create(name, schema, indexes, function (err) {
+          should.not.exist(err)
+          done()
+        })
+      })
+    })
+
   })
 
   describe('when caching geojson', function () {

@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unrelease
+### Changed
+* Remove `EXISTS` query prior to table creation.
+
 ## [1.7.0] - 2016-03-20
 ### Added
 * Cache will retry initial connection if DB is not available

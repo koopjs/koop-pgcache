@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unrelease
+## [1.7.1] - 2016-07-27
 ### Changed
 * Remove `EXISTS` query prior to table creation.
 
@@ -195,6 +195,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 * Created a new method for applying coded value domain from Esri services: applyCodedDomains - called when filtering data with fields that contain coded value domains
 
+[1.7.1]: https://github.com/koopjs/koop-pgcache/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/koopjs/koop-pgcache/compare/v1.6.6...v1.7.0
 [1.6.6]: https://github.com/koopjs/koop-pgcache/compare/v1.6.5...v1.6.6
 [1.6.5]: https://github.com/koopjs/koop-pgcache/compare/v1.6.4...v1.6.5
